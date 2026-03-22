@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QOTSA — The Phantom Album</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+  :root{
+    --bone:#e8e0d0;--rust:#c0392b;--sand:#b5a48a;
+    --dark:#0d0b08;--charcoal:#1a1612;--mid:#2d2720;
+    --accent:#e8a020;--sp:#1db954;--sp-dark:#158a3e;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--dark);color:var(--bone);font-family:'Space Mono',monospace;min-height:100vh;overflow-x:hidden;}
+  header{border-bottom:2px solid var(--rust);padding:3rem 4rem 2rem;position:relative;overflow:hidden;}
+  header::after{content:'QOTSA';position:absolute;right:-10px;top:-15px;font-family:'Bebas Neue',sans-serif;font-size:200px;color:rgba(192,57,43,.05);pointer-events:none;line-height:1;}
+  .band-label{font-size:.65rem;letter-spacing:.3em;color:var(--rust);text-transform:uppercase;margin-bottom:.5rem;}
+  h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,8vw,6rem);letter-spacing:.05em;line-height:.9;}
+  h1 span{color:var(--rust);}
+  .subtitle{margin-top:1rem;font-size:.7rem;color:var(--sand);letter-spacing:.12em;max-width:520px;line-height:1.9;}
+  main{max-width:1100px;margin:0 auto;padding:2.5rem 2rem;}
+
+  /* ── Spotify Panel ── */
+  .sp-panel{background:var(--charcoal);border:1px solid var(--mid);border-left:3px solid var(--mid);padding:1.2rem 1.5rem;margin-bottom:2.5rem;transition:border-color .3s;}
+  .sp-panel.connected{border-left-color:var(--sp);}
+  .sp-panel.warning{border-left-color:var(--accent);}
+  .sp-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+  .sp-label{font-size:.6rem;letter-spacing:.2em;color:var(--sand);text-transform:uppercase;white-space:nowrap;flex-shrink:0;}
+  .sp-input{background:var(--dark);border:1px solid var(--mid);color:var(--bone);font-family:'Space Mono',monospace;font-size:.68rem;padding:.45rem .85rem;flex:1;min-width:160px;letter-spacing:.04em;}
+  .sp-input:focus{outline:none;border-color:var(--rust);}
+  .sp-btn{background:var(--sp);border:none;color:#000;font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.14em;padding:.45rem 1.1rem;cursor:pointer;text-transform:uppercase;font-weight:700;white-space:nowrap;transition:background .2s;}
+  .sp-btn:hover{background:var(--sp-dark);}
+  .sp-btn:disabled{opacity:.45;cursor:not-allowed;}
+  .sp-btn.ghost{background:transparent;border:1px solid var(--sp);color:var(--sp);font-weight:400;}
+  .sp-btn.ghost:hover{background:rgba(29,185,84,.1);}
+  .sp-status{font-size:.62rem;letter-spacing:.12em;}
+  .sp-status.ok{color:var(--sp);}
+  .sp-status.warn{color:var(--accent);}
+  .sp-hint{font-size:.56rem;color:var(--mid);margin-top:.5rem;line-height:1.6;}
+  .sp-hint code{color:var(--accent);font-family:'Space Mono',monospace;}
+
+  /* ── Controls ── */
+  .controls{display:flex;gap:.75rem;align-items:center;margin-bottom:3rem;flex-wrap:wrap;}
+  .vibe-label{font-size:.65rem;letter-spacing:.2em;color:var(--sand);text-transform:uppercase;}
+  .vibe-btn{background:transparent;border:1px solid var(--mid);color:var(--sand);font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.15em;padding:.5rem 1rem;cursor:pointer;text-transform:uppercase;transition:all .2s;}
+  .vibe-btn:hover,.vibe-btn.active{background:var(--rust);border-color:var(--rust);color:var(--bone);}
+  .gen-btn{background:var(--rust);border:none;color:var(--bone);font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.15em;padding:.7rem 2rem;cursor:pointer;transition:background .2s;margin-left:auto;}
+  .gen-btn:hover{background:var(--accent);color:var(--dark);}
+
+  /* ── Album ── */
+  .album-container{display:none;}
+  .album-container.visible{display:block;animation:fadeUp .5s ease forwards;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  .album-header{display:grid;grid-template-columns:260px 1fr;gap:3rem;margin-bottom:3rem;align-items:start;}
+  .album-cover{width:260px;height:260px;background:var(--charcoal);border:1px solid var(--mid);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;flex-shrink:0;}
+  .album-cover::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 18px,rgba(192,57,43,.04) 18px,rgba(192,57,43,.04) 19px);}
+  .cover-inner{position:relative;z-index:2;text-align:center;padding:1.5rem;}
+  .cover-circle{width:110px;height:110px;border-radius:50%;border:2px solid var(--rust);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;position:relative;}
+  .cover-circle::before{content:'';position:absolute;inset:9px;border-radius:50%;border:1px solid rgba(192,57,43,.3);}
+  .cover-icon{font-size:2.4rem;}
+  .cover-title{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;color:var(--bone);line-height:1.15;}
+  .cover-band{font-size:.5rem;letter-spacing:.3em;color:var(--rust);margin-top:.3rem;}
+  .album-meta h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(2rem,4vw,3.2rem);letter-spacing:.04em;line-height:.92;margin-bottom:.5rem;}
+  .album-meta h2 span{color:var(--rust);}
+  .album-tagline{font-size:.62rem;color:var(--sand);letter-spacing:.18em;text-transform:uppercase;margin-bottom:1.5rem;}
+  .album-concept{font-size:.72rem;line-height:1.9;border-left:2px solid var(--rust);padding-left:1rem;color:var(--bone);max-width:500px;}
+  .album-stats{display:flex;gap:2rem;margin-top:1.5rem;flex-wrap:wrap;}
+  .stat-val{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--accent);line-height:1;display:block;}
+  .stat-label{font-size:.52rem;color:var(--sand);letter-spacing:.2em;text-transform:uppercase;}
+
+  /* Spotify action zone */
+  .sp-action{margin-top:1.2rem;display:flex;flex-direction:column;gap:.5rem;align-items:flex-start;}
+  .sp-add-btn{display:none;align-items:center;gap:.5rem;background:var(--sp);border:none;color:#000;font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.12em;padding:.55rem 1.2rem;cursor:pointer;text-transform:uppercase;font-weight:700;transition:background .2s;}
+  .sp-add-btn.show{display:flex;}
+  .sp-add-btn:hover{background:var(--sp-dark);}
+  .sp-add-btn:disabled{opacity:.45;cursor:not-allowed;}
+  .sp-feedback{font-size:.63rem;padding:.5rem .8rem;border:1px solid transparent;display:none;}
+  .sp-feedback.show{display:block;}
+  .sp-feedback.ok{border-color:var(--sp);color:var(--sp);}
+  .sp-feedback.err{border-color:var(--rust);color:var(--rust);}
+  .sp-feedback a{color:inherit;}
+
+  /* ── Tracklist ── */
+  .tracklist-header{display:flex;align-items:center;gap:1rem;margin-bottom:.5rem;border-top:1px solid var(--mid);padding-top:2rem;}
+  .tracklist-header h3{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.12em;color:var(--rust);white-space:nowrap;}
+  .tracklist-header .line{flex:1;height:1px;background:var(--mid);}
+  .side-label{font-family:'Bebas Neue',sans-serif;font-size:.8rem;letter-spacing:.3em;color:var(--rust);margin:1.5rem 0 .25rem;display:flex;align-items:center;gap:1rem;}
+  .side-label::after{content:'';flex:1;height:1px;background:var(--rust);opacity:.25;}
+  .track{display:grid;grid-template-columns:38px 1fr auto;gap:1rem;align-items:start;padding:1.1rem .5rem;border-bottom:1px solid rgba(45,39,32,.7);transition:background .15s;}
+  .track:hover{background:rgba(192,57,43,.05);}
+  .track-num{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--rust);opacity:.45;line-height:1;padding-top:3px;}
+  .track-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.04em;color:var(--bone);line-height:1;margin-bottom:.2rem;}
+  .track-from{font-size:.57rem;color:var(--sand);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.3rem;}
+  .track-why{font-size:.65rem;color:rgba(232,224,208,.55);line-height:1.75;font-style:italic;}
+  .track-duration{font-size:.68rem;color:var(--sand);font-variant-numeric:tabular-nums;padding-top:4px;white-space:nowrap;}
+  .producer-notes{margin-top:2.5rem;background:var(--charcoal);border:1px solid var(--mid);padding:1.8rem 2rem;}
+  .producer-notes h4{font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.12em;color:var(--rust);margin-bottom:.8rem;}
+  .producer-notes p{font-size:.68rem;line-height:1.95;color:var(--bone);font-style:italic;}
+  .shuffle-note{font-size:.55rem;color:var(--mid);letter-spacing:.1em;text-align:right;margin-top:1.5rem;text-transform:uppercase;}
+
+  /* spotify attribution */
+  .sp-attribution{font-size:.52rem;color:var(--mid);margin-top:.3rem;letter-spacing:.08em;}
+  .sp-attribution a{color:var(--sp);text-decoration:none;}
+
+  @media(max-width:640px){
+    header{padding:2rem 1.5rem;}main{padding:2rem 1rem;}
+    .album-header{grid-template-columns:1fr;}.album-cover{width:100%;height:200px;}
+    .controls{gap:.5rem;}.gen-btn{margin-left:0;width:100%;}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="band-label">Queens of the Stone Age · Phantomalbum Generator</div>
+  <h1>THE <span>PHANTOM</span><br>ALBUM</h1>
+  <p class="subtitle">De volledige QOTSA-catalogus ligt in de studio. Acht albums, honderden opnames. Kies een sfeer — de machine stelt het album samen.</p>
+</header>
+<main>
+
+  <!-- Spotify panel -->
+  <div class="sp-panel" id="spPanel">
+    <div class="sp-row" id="spLoginRow">
+      <span class="sp-label">Spotify</span>
+      <input class="sp-input" id="cidInput" placeholder="Plak je Spotify Client ID hier…" />
+      <button class="sp-btn" onclick="doLogin()">Verbinden</button>
+    </div>
+    <div id="spConnectedRow" style="display:none">
+      <div class="sp-row">
+        <span class="sp-label">Spotify</span>
+        <span class="sp-status ok" id="spStatusText">✓ Verbonden</span>
+        <button class="sp-btn ghost" onclick="doLogout()">Uitloggen</button>
+      </div>
+    </div>
+    <div class="sp-hint" id="spHint"></div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <span class="vibe-label">Sfeer:</span>
+    <button class="vibe-btn active" data-vibe="raw">Raw &amp; Duister</button>
+    <button class="vibe-btn" data-vibe="groove">Desert Groove</button>
+    <button class="vibe-btn" data-vibe="psych">Psychedelisch</button>
+    <button class="vibe-btn" data-vibe="heavy">Maximaal Heavy</button>
+    <button class="gen-btn" onclick="generateAlbum()">&#9654; Stel album samen</button>
+  </div>
+
+  <div class="album-container" id="albumContainer"></div>
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// Spotify PKCE Client  (compliant: PKCE, /items endpoint, token refresh,
+//                       exponential backoff, full error handling)
+// ═══════════════════════════════════════════════════════════════════════════
+const SP = (() => {
+  const PFX = 'qs_';
+  const k = n => PFX + n;
+  const SCOPES = 'playlist-modify-public playlist-modify-private';
+
+  function redirectUri() {
+    const uri = window.location.origin + window.location.pathname;
+    if (location.protocol !== 'https:' && !/^127\.0\.0\.1/.test(location.hostname))
+      console.warn('[Spotify] Redirect URI moet HTTPS zijn voor productie.');
+    return uri;
+  }
+
+  async function rand32() {
+    const a = new Uint8Array(32); crypto.getRandomValues(a);
+    return btoa(String.fromCharCode(...a)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+  }
+  async function sha256b64url(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+  }
+
+  async function login(clientId) {
+    localStorage.setItem(k('cid'), clientId);
+    const v = await rand32();
+    localStorage.setItem(k('v'), v);
+    const challenge = await sha256b64url(v);
+    const params = new URLSearchParams({
+      client_id: clientId, response_type: 'code',
+      redirect_uri: redirectUri(), scope: SCOPES,
+      code_challenge_method: 'S256', code_challenge: challenge
+    });
+    window.location = 'https://accounts.spotify.com/authorize?' + params;
+  }
+
+  async function _saveTokens(r) {
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error_description || d.error || `HTTP ${r.status}`);
+    localStorage.setItem(k('token'), d.access_token);
+    localStorage.setItem(k('exp'),   Date.now() + (d.expires_in - 60) * 1000);
+    if (d.refresh_token) localStorage.setItem(k('refresh'), d.refresh_token);
+  }
+
+  async function _exchange(code) {
+    const r = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST', headers: {'Content-Type':'application/x-www-form-urlencoded'},
+      body: new URLSearchParams({ grant_type:'authorization_code', code,
+        redirect_uri: redirectUri(), client_id: localStorage.getItem(k('cid')),
+        code_verifier: localStorage.getItem(k('v')) })
+    });
+    await _saveTokens(r);
+  }
+
+  async function _refresh() {
+    const rt = localStorage.getItem(k('refresh'));
+    if (!rt) throw new Error('Sessie verlopen. Log opnieuw in.');
+    const r = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST', headers: {'Content-Type':'application/x-www-form-urlencoded'},
+      body: new URLSearchParams({ grant_type:'refresh_token', refresh_token: rt,
+        client_id: localStorage.getItem(k('cid')) })
+    });
+    await _saveTokens(r);
+  }
+
+  async function _token() {
+    const t = localStorage.getItem(k('token'));
+    const e = parseInt(localStorage.getItem(k('exp')) || '0');
+    if (t && Date.now() < e) return t;
+    await _refresh();
+    return localStorage.getItem(k('token'));
+  }
+
+  // Fetch with exponential backoff on 429
+  async function api(endpoint, opts = {}, attempt = 0) {
+    const token = await _token();
+    const res = await fetch('https://api.spotify.com/v1' + endpoint, {
+      ...opts,
+      headers: { 'Authorization': 'Bearer ' + token,
+                 'Content-Type': 'application/json', ...(opts.headers||{}) }
+    });
+
+    if (res.status === 429) {
+      if (attempt >= 4) throw new Error('Spotify rate limit — probeer het later opnieuw.');
+      const retryAfter = parseInt(res.headers.get('Retry-After') || '1');
+      const wait = retryAfter * 1000 * Math.pow(2, attempt);
+      await new Promise(r => setTimeout(r, wait));
+      return api(endpoint, opts, attempt + 1);
+    }
+
+    if (res.status === 204) return {};
+
+    const data = await res.json();
+    if (!res.ok) {
+      const msg = data?.error?.message || `HTTP ${res.status}`;
+      if (res.status === 401) throw new Error('Sessie verlopen — log opnieuw in. (' + msg + ')');
+      if (res.status === 403) throw new Error('Toegang geweigerd — controleer je Spotify-app scopes. (' + msg + ')');
+      if (res.status === 404) throw new Error('Niet gevonden op Spotify: ' + msg);
+      throw new Error(`Spotify fout ${res.status}: ${msg}`);
+    }
+    return data;
+  }
+
+  async function handleCallback() {
+    const p = new URLSearchParams(location.search);
+    if (p.get('error')) throw new Error('Spotify login geweigerd: ' + p.get('error'));
+    if (!p.get('code')) return false;
+    await _exchange(p.get('code'));
+    history.replaceState({}, '', location.pathname);
+    return true;
+  }
+
+  function logout() {
+    ['token','exp','refresh','v'].forEach(n => localStorage.removeItem(k(n)));
+  }
+
+  const isConnected = () => !!localStorage.getItem(k('token'));
+  const clientId    = () => localStorage.getItem(k('cid')) || '';
+  const getRedirectUri = redirectUri;
+
+  // ── API helpers ────────────────────────────────────────────────────────
+  async function searchTrack(title, artist) {
+    const q = encodeURIComponent(`track:${title} artist:${artist}`);
+    const d = await api(`/search?q=${q}&type=track&limit=1`);
+    return d.tracks?.items?.[0]?.uri ?? null;
+  }
+
+  async function createPlaylist(name, description) {
+    const me = await api('/me');
+    return api(`/users/${encodeURIComponent(me.id)}/playlists`, {
+      method: 'POST',
+      body: JSON.stringify({ name, description, public: false })
+    });
+  }
+
+  // Uses /playlists/{id}/items (not deprecated /tracks)
+  async function addItems(playlistId, uris) {
+    for (let i = 0; i < uris.length; i += 100) {
+      await api(`/playlists/${playlistId}/items`, {
+        method: 'POST',
+        body: JSON.stringify({ uris: uris.slice(i, i + 100) })
+      });
+    }
+  }
+
+  return { login, handleCallback, logout, isConnected, clientId,
+           getRedirectUri, searchTrack, createPlaylist, addItems };
+})();
+
+// ═══════════════════════════════════════════════════════════════════════════
+// UI helpers
+// ═══════════════════════════════════════════════════════════════════════════
+function updateSpotifyUI() {
+  const connected = SP.isConnected();
+  document.getElementById('spLoginRow').style.display     = connected ? 'none' : '';
+  document.getElementById('spConnectedRow').style.display = connected ? '' : 'none';
+  document.getElementById('spPanel').className = 'sp-panel' + (connected ? ' connected' : '');
+
+  const hint = document.getElementById('spHint');
+  if (!connected) {
+    const uri = SP.getRedirectUri();
+    const isHttps = location.protocol === 'https:' || /^127\.0\.0\.1/.test(location.hostname);
+    hint.innerHTML = `Redirect URI voor Spotify Dashboard: <code>${uri}</code>`
+      + (!isHttps ? '<br><span style="color:var(--accent)">⚠ Gebruik HTTPS voor productie.</span>' : '');
+    document.getElementById('spPanel').classList.toggle('warning', !isHttps);
+  } else {
+    hint.textContent = '';
+  }
+
+  // Show/hide add-to-spotify button if album is rendered
+  const addBtn = document.getElementById('spAddBtn');
+  if (addBtn) addBtn.classList.toggle('show', connected);
+}
+
+function doLogin() {
+  const cid = document.getElementById('cidInput').value.trim();
+  if (!cid) { alert('Vul je Spotify Client ID in.'); return; }
+  SP.login(cid).catch(e => alert(e.message));
+}
+
+function doLogout() {
+  SP.logout();
+  updateSpotifyUI();
+  const addBtn = document.getElementById('spAddBtn');
+  if (addBtn) addBtn.classList.remove('show');
+}
+
+async function doAddToSpotify() {
+  const btn      = document.getElementById('spAddBtn');
+  const feedback = document.getElementById('spFeedback');
+  btn.disabled = true;
+  btn.textContent = 'Bezig…';
+  feedback.className = 'sp-feedback';
+  feedback.style.display = 'none';
+
+  try {
+    const album  = window.__album__;
+    const tracks = album.tracks;
+    const pl = await SP.createPlaylist(
+      'QOTSA — ' + album.albumTitle,
+      'Phantom Album samengesteld via The Phantom Album App'
+    );
+
+    const uris = [];
+    for (const t of tracks) {
+      const uri = await SP.searchTrack(t.title, 'Queens of the Stone Age');
+      if (uri) uris.push(uri);
+    }
+
+    await SP.addItems(pl.id, uris);
+
+    const url = pl.external_urls?.spotify || '#';
+    feedback.innerHTML = `✓ Playlist aangemaakt! ${uris.length}/${tracks.length} nummers gevonden op Spotify. `
+      + `<a href="${url}" target="_blank" rel="noopener">Open in Spotify ↗</a>`
+      + `<br><span class="sp-attribution">Muziekdata door <a href="https://www.spotify.com" target="_blank" rel="noopener">Spotify</a></span>`;
+    feedback.className = 'sp-feedback show ok';
+  } catch (e) {
+    feedback.textContent = '✗ ' + e.message;
+    feedback.className   = 'sp-feedback show err';
+  }
+
+  btn.disabled = false;
+  btn.textContent = '▶ Toevoegen aan Spotify';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Album data
+// ═══════════════════════════════════════════════════════════════════════════
+const ALBUMS = {
+  raw:[
+    {albumTitle:"Blood on the Meridian",tagline:"Twaalf tracks. Geen genade.",icon:"🦂",
+     concept:"Een album dat klinkt als de woestijn na middernacht — dreigend, smerig en feilloos. Geen enkel nummer biedt rust. Elk riff is een mes.",
+     producerNote:"We hebben de banden teruggedraaid tot de momenten waarop QOTSA hun tanden lieten zien. Geen singles, geen radiofreundelijkheid. Side A opent een wond. Side B wrijft er zout in.",
+     tracks:[
+       {title:"You Think I Ain't Worth a Dollar, But I Feel Like a Millionaire",album:"Songs for the Deaf (2002)",duration:"3:12",why:"De perfecte aanval van voren — rauw, snel, meedogenloos."},
+       {title:"Sick Sick Sick",album:"Era Vulgaris (2007)",duration:"3:26",why:"Een riff als een betonblok in de maag — compact en pijnlijk effectief."},
+       {title:"Mexicola",album:"Queens of the Stone Age (1998)",duration:"4:54",why:"Het debuut op zijn duisterst — traag, hypnotisch en bijna gevaarlijk."},
+       {title:"First It Giveth",album:"Songs for the Deaf (2002)",duration:"3:18",why:"Een van de meest compacte agressieve uitbarstingen in de hele catalogus."},
+       {title:"Run Pig Run",album:"Era Vulgaris (2007)",duration:"3:36",why:"Klinkt alsof de band zichzelf haat en dat in geluid wil vangen — en het lukt."},
+       {title:"Hangin' Tree",album:"Songs for the Deaf (2002)",duration:"3:06",why:"Een minuut opbouwen, dan twee minuten pure chaos — scharnier van Side A."},
+       {title:"God Is in the Radio",album:"Songs for the Deaf (2002)",duration:"6:04",why:"De donkere piek van het album — kosmisch en tegelijk volledig gestoord."},
+       {title:"Turnin' on the Screw",album:"Era Vulgaris (2007)",duration:"4:44",why:"Mechanisch, koud en onvermijdelijk — een machine die weigert te stoppen."},
+       {title:"Someone's in the Wolf",album:"Lullabies to Paralyze (2005)",duration:"7:15",why:"Beangstigend lang, beangstigend goed — de trage horror van Side B."},
+       {title:"Battery Acid",album:"Era Vulgaris (2007)",duration:"3:41",why:"Druipend van giftige energie, een riff die in de hersenen blijft branden."},
+       {title:"A Song for the Dead",album:"Songs for the Deaf (2002)",duration:"6:42",why:"Dave Grohl slaat alsof zijn leven ervan afhangt — het dodelijkste slotgeweld."},
+       {title:"Mosquito Song",album:"Songs for the Deaf (2002)",duration:"5:37",why:"Een akoestische doodsbrief als afsluiter — donker, stil, definitief."}
+     ]},
+    {albumTitle:"Rot & Resonance",tagline:"Gebouwd uit afval. Klinkt als goud.",icon:"☠️",
+     concept:"Een fictief album dat de rafelkanten van de catalogus bij elkaar brengt. Elk nummer heeft iets kapots, iets gevaarlijks. Samen vormen ze een coherente nachtmerrie.",
+     producerNote:"Dit album begon als een lijst van nummers die te raar, te donker of te lang waren voor hun originele albums. Nu is het de enige plek waar ze thuishoren.",
+     tracks:[
+       {title:"Walkin' on the Sidewalks",album:"Queens of the Stone Age (1998)",duration:"5:03",why:"De debuutplaat op zijn smerigst — een slepende opener die direct de toon zet."},
+       {title:"Suture Up Your Future",album:"Era Vulgaris (2007)",duration:"3:54",why:"Klinkt als een wond naaien zonder verdoving — pijnlijk en verplicht."},
+       {title:"Song for the Dead",album:"Songs for the Deaf (2002)",duration:"5:52",why:"Donkere, slepende doom — de ruggengraat van Side A."},
+       {title:"Into the Hollow",album:"Era Vulgaris (2007)",duration:"4:51",why:"Een lege ruimte die langzaam met geluid wordt gevuld — beklemmend."},
+       {title:"You Can't Quit Me Baby",album:"Queens of the Stone Age (1998)",duration:"7:42",why:"Negen minuten woestijnrock op z'n traagst en dodelijkst."},
+       {title:"The Blood Is Love",album:"Lullabies to Paralyze (2005)",duration:"6:37",why:"Episch en grimmig — sluit Side A af als een zware deur die dichtslaat."},
+       {title:"Keep Your Eyes Peeled",album:"...Like Clockwork (2013)",duration:"5:43",why:"Dreigend en traag — perfect begin van Side B."},
+       {title:"I Think I Lost My Headache",album:"Rated R (2000)",duration:"7:04",why:"Het wonderlijke slotmonster van Rated R — kronkelend en onverzadigbaar."},
+       {title:"Emotion Sickness",album:"In Times New Roman... (2023)",duration:"5:12",why:"QOTSA op hun meest recente en meest sinistere."},
+       {title:"Broken Box",album:"Lullabies to Paralyze (2005)",duration:"3:02",why:"Compact en knarsend — een rauwe reset halverwege Side B."},
+       {title:"...Like Clockwork",album:"...Like Clockwork (2013)",duration:"4:44",why:"Homme op z'n meest kwetsbaar — geen opluchting, alleen breuk."},
+       {title:"Long Slow Goodbye",album:"Lullabies to Paralyze (2005)",duration:"6:50",why:"Traag, pijnlijk en onvermijdelijk — precies wat de titel belooft."}
+     ]}
+  ],
+  groove:[
+    {albumTitle:"Mirage Mechanics",tagline:"Rijd totdat de horizon verdwijnt.",icon:"🌵",
+     concept:"Dit album is een lange rit door de Mojave om drie uur 's nachts. De riffs kabbelen als hittegolven. Nergens hoef je naartoe. Dat is het punt.",
+     producerNote:"Wij zochten de nummers waarbij de groep niet meer losse muzikanten is maar één organisme. De volgorde is gebouwd als een roadtrip.",
+     tracks:[
+       {title:"Go with the Flow",album:"Songs for the Deaf (2002)",duration:"3:09",why:"De hypnotischste QOTSA-single — perfecte ritmische opener."},
+       {title:"3's & 7's",album:"Era Vulgaris (2007)",duration:"3:43",why:"Onweerstaanbare groove met een riff die vastplakt aan de binnenkant van de schedel."},
+       {title:"Little Sister",album:"Lullabies to Paralyze (2005)",duration:"2:54",why:"Compact en swingend — de motor draait moeiteloos op volle toeren."},
+       {title:"Regular John",album:"Queens of the Stone Age (1998)",duration:"4:35",why:"Het allereerste QOTSA-nummer en nog steeds een van de meest organisch rollende."},
+       {title:"Make It Wit Chu",album:"Era Vulgaris (2007)",duration:"4:08",why:"Warm, sluipend en sensueel — het zand waait over de weg."},
+       {title:"The Lost Art of Keeping a Secret",album:"Rated R (2000)",duration:"3:37",why:"Strak, melodieus en vol ingehouden spanning — scharnier van Side A."},
+       {title:"Smooth Sailing",album:"...Like Clockwork (2013)",duration:"4:08",why:"Bijna funky — Homme laat zien dat groove ook glinstert."},
+       {title:"The Way You Used to Do",album:"Villains (2017)",duration:"3:32",why:"Lichtvoetig en meedogenloos — de machine lacht mee."},
+       {title:"Monsters in the Parasol",album:"Rated R (2000)",duration:"3:56",why:"Een van de meest onderschatte groove-nummers in de catalogus."},
+       {title:"Feet Don't Fail",album:"Villains (2017)",duration:"5:02",why:"Krautrock-invloeden in een woestijnjas — ritme boven alles."},
+       {title:"I Sat by the Ocean",album:"...Like Clockwork (2013)",duration:"3:54",why:"Licht maar niet oppervlakkig — de zon begint te zakken."},
+       {title:"Avon",album:"Queens of the Stone Age (1998)",duration:"3:22",why:"Een van de meest pure woestijngrooves ooit — stille, perfecte landing."}
+     ]},
+    {albumTitle:"Sand & Signal",tagline:"De woestijn heeft een eigen ritme.",icon:"🏜️",
+     concept:"Waar Mirage Mechanics over rijden gaat, gaat Sand & Signal over stilstaan en luisteren. De grooves zijn ruimer, trager, uitadmend.",
+     producerNote:"We zochten de momenten waarop QOTSA meer op een ritueel leek dan op een rockband. Nummers waarbij de ruimte in de kamer verschuift.",
+     tracks:[
+       {title:"Leg of Lamb",album:"Rated R (2000)",duration:"3:34",why:"Sluipend en gecontroleerd — een opener die de ruimte vult voor het explodeert."},
+       {title:"Everybody Knows That You Are Insane",album:"Lullabies to Paralyze (2005)",duration:"4:14",why:"Knallende groove met een haast komische urgentie."},
+       {title:"Tangled Up in Plaid",album:"Lullabies to Paralyze (2005)",duration:"4:13",why:"Ritmisch als een aangedraaide veer die weigert los te laten."},
+       {title:"Head Like a Haunted House",album:"Villains (2017)",duration:"3:41",why:"Mechanisch en catchy tegelijk — de machine lacht mee."},
+       {title:"No One Knows",album:"Songs for the Deaf (2002)",duration:"4:38",why:"De meest perfecte QOTSA-single — tijdloos en onontkoombaar."},
+       {title:"Misfit Love",album:"Era Vulgaris (2007)",duration:"5:43",why:"Breed, slepend en groovend — het zwaarste hart van Side A."},
+       {title:"River in the Road",album:"Era Vulgaris (2007)",duration:"3:59",why:"Een zeldzaam rustige QOTSA-groove, zoals water dat traag stroomt."},
+       {title:"Un-Reborn Again",album:"Villains (2017)",duration:"4:55",why:"Langzame hypnose — Side B begint droomachtig maar sinister."},
+       {title:"Auto Pilot",album:"Rated R (2000)",duration:"3:44",why:"Strak als een circuit, soepel als olie — een van de meest onderschatte tracks."},
+       {title:"Obscenery",album:"In Times New Roman... (2023)",duration:"4:37",why:"Recente QOTSA die bewijst dat de groove nooit is verdwenen."},
+       {title:"In the Fade",album:"Rated R (2000)",duration:"4:35",why:"Melodieus en warm — de sfeer daalt als de zon."},
+       {title:"You Got a Killer Scene There, Man",album:"Lullabies to Paralyze (2005)",duration:"4:56",why:"Relaxed, bijna stoner — de perfecte uitademing als slot."}
+     ]}
+  ],
+  psych:[
+    {albumTitle:"Frequencies from the Void",tagline:"Niet alles wat je hoort is er ook.",icon:"🌀",
+     concept:"Een album dat op het randje balanceert tussen luciditeit en hallucinatie. De nummers verschuiven de werkelijkheid net iets — riffs die draaien, structuren die wegglijden.",
+     producerNote:"Dit is het album dat om drie uur 's nachts in de opnamestudio ontstond toen iedereen te moe was om normaal te spelen. De weirdheid, de stiltes — we hebben ze alle behouden.",
+     tracks:[
+       {title:"Better Living Through Chemistry",album:"Rated R (2000)",duration:"6:22",why:"Zes minuten vertraagde bewustzijnsverandering — de enige juiste opener."},
+       {title:"The Vampyre of Time and Memory",album:"...Like Clockwork (2013)",duration:"4:44",why:"Piano en vervreemding — een lied dat klinkt als een herinnering die vervaagt."},
+       {title:"Kalopsia",album:"...Like Clockwork (2013)",duration:"5:09",why:"'Dingen mooier zien dan ze zijn' — muzikaal perfect uitgevoerd."},
+       {title:"God Is in the Radio",album:"Songs for the Deaf (2002)",duration:"6:04",why:"Kosmisch en geestverruimend — een transmissie van ergens anders."},
+       {title:"If I Had a Tail",album:"...Like Clockwork (2013)",duration:"4:18",why:"Scheef, slingerend en onbehagelijk mooi — Side A sluit de deur zachtjes."},
+       {title:"I Think I Lost My Headache",album:"Rated R (2000)",duration:"7:04",why:"Het meest experimentele van Rated R — verplicht scharnierpunt."},
+       {title:"Hispanic Impressions",album:"Queens of the Stone Age (1998)",duration:"2:44",why:"Surrealistisch instrumentaal intermezzo — reset voor de tweede helft."},
+       {title:"I Appear Missing",album:"...Like Clockwork (2013)",duration:"6:32",why:"Structureel apart, emotioneel overweldigend — het centrum van Side B."},
+       {title:"Carnavoyeur",album:"In Times New Roman... (2023)",duration:"4:28",why:"Recente QOTSA op hun meest cinematografisch en vreemd."},
+       {title:"Negative Space",album:"In Times New Roman... (2023)",duration:"5:14",why:"De stilte in het nummer is even luid als de noten — bewust, psychedelisch."},
+       {title:"Fairweather Friends",album:"...Like Clockwork (2013)",duration:"5:27",why:"Groots, gelaagd en vreemd — een kerkdienst voor ongelovigen."},
+       {title:"...Like Clockwork",album:"...Like Clockwork (2013)",duration:"4:44",why:"Homme alleen met pijn — de enige eerlijke manier om te eindigen."}
+     ]}
+  ],
+  heavy:[
+    {albumTitle:"Crush Depth",tagline:"Tot het punt waarop metaal bezwijkt.",icon:"💀",
+     concept:"Een album puur gebouwd voor maximale sonische impact. Elk nummer geselecteerd op destructieve kracht — samen een ononderbroken aanval.",
+     producerNote:"Wij speelden de gehele catalogus op maximaal volume en noteerden welke nummers de muren deden trillen. Dit zijn ze. De volgorde is een bewuste escalatie.",
+     tracks:[
+       {title:"You Think I Ain't Worth a Dollar, But I Feel Like a Millionaire",album:"Songs for the Deaf (2002)",duration:"3:12",why:"Een kanonschot als opening — Nick Oliveri gilt, de wereld trilt mee."},
+       {title:"Sick Sick Sick",album:"Era Vulgaris (2007)",duration:"3:26",why:"Een riff als een sloopkogel — compact, onmiddellijk en pijnlijk effectief."},
+       {title:"No One Knows",album:"Songs for the Deaf (2002)",duration:"4:38",why:"Dave Grohl op zijn gewelddadigst — het meest verwoestende drumspel in de catalogus."},
+       {title:"A Song for the Dead",album:"Songs for the Deaf (2002)",duration:"6:42",why:"Lang, zwaar en meedogenloos — het monster van Side A."},
+       {title:"Burn the Witch",album:"Lullabies to Paralyze (2005)",duration:"3:35",why:"Strak en genadeloos — geen vet, alleen spier."},
+       {title:"Hangin' Tree",album:"Songs for the Deaf (2002)",duration:"3:06",why:"Klein maar dodelijk — sluit Side A af als een messteek."},
+       {title:"3's & 7's",album:"Era Vulgaris (2007)",duration:"3:43",why:"Het zwaarste hitsingletje van de band — Side B opent met een vuist."},
+       {title:"My God Is the Sun",album:"...Like Clockwork (2013)",duration:"3:54",why:"Episch en verwoestend — zware riffs met de zon als vijand."},
+       {title:"Turnin' on the Screw",album:"Era Vulgaris (2007)",duration:"4:44",why:"Mechanisch geweld, koud en precies — de machine op volle kracht."},
+       {title:"Run Pig Run",album:"Era Vulgaris (2007)",duration:"3:36",why:"Chaotisch en agressief — het meest pure geweld op Era Vulgaris."},
+       {title:"Paper Machete",album:"In Times New Roman... (2023)",duration:"4:05",why:"De nieuwste QOTSA bewijst dat de hamer nog scherp is."},
+       {title:"Song for the Dead",album:"Songs for the Deaf (2002)",duration:"5:52",why:"Het zwaarste slotakkoord denkbaar — het album sterft op zijn eigen voorwaarden."}
+     ]}
+  ]
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Render
+// ═══════════════════════════════════════════════════════════════════════════
+const lastIdx = {};
+
+document.querySelectorAll('.vibe-btn').forEach(b =>
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.vibe-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+  })
+);
+
+function generateAlbum() {
+  const vibe = document.querySelector('.vibe-btn.active').dataset.vibe;
+  const pool = ALBUMS[vibe];
+  let idx = Math.floor(Math.random() * pool.length);
+  if (pool.length > 1 && idx === (lastIdx[vibe] ?? -1)) idx = (idx + 1) % pool.length;
+  lastIdx[vibe] = idx;
+  renderAlbum(pool[idx]);
+}
+
+function renderAlbum(album) {
+  window.__album__ = album;
+  const c = document.getElementById('albumContainer');
+  const totalMins = Math.floor(album.tracks.reduce((a,t) => {
+    const [m,s] = (t.duration||'4:00').split(':').map(Number);
+    return a + m*60 + (s||0);
+  }, 0) / 60);
+
+  const tr = (t, i) =>
+    `<div class="track">
+      <div class="track-num">${String(i+1).padStart(2,'0')}</div>
+      <div>
+        <div class="track-title">${t.title}</div>
+        <div class="track-from">van: ${t.album}</div>
+        <div class="track-why">${t.why}</div>
+      </div>
+      <div class="track-duration">${t.duration}</div>
+    </div>`;
+
+  const showSp = SP.isConnected() ? 'show' : '';
+
+  c.innerHTML = `
+    <div class="album-header">
+      <div class="album-cover">
+        <div class="cover-inner">
+          <div class="cover-circle"><span class="cover-icon">${album.icon}</span></div>
+          <div class="cover-title">${album.albumTitle}</div>
+          <div class="cover-band">Queens of the Stone Age</div>
+        </div>
+      </div>
+      <div class="album-meta">
+        <h2>Queens of the<br>Stone Age<br><span>${album.albumTitle}</span></h2>
+        <div class="album-tagline">${album.tagline}</div>
+        <div class="album-concept">${album.concept}</div>
+        <div class="album-stats">
+          <div><span class="stat-val">${album.tracks.length}</span><span class="stat-label">Tracks</span></div>
+          <div><span class="stat-val">${totalMins}'</span><span class="stat-label">Speeltijd</span></div>
+          <div><span class="stat-val">8</span><span class="stat-label">Albums</span></div>
+        </div>
+        <div class="sp-action">
+          <button class="sp-add-btn ${showSp}" id="spAddBtn" onclick="doAddToSpotify()">▶ Toevoegen aan Spotify</button>
+          <div class="sp-feedback" id="spFeedback"></div>
+        </div>
+      </div>
+    </div>
+    <div class="tracklist-header"><h3>Tracklist</h3><div class="line"></div></div>
+    <div class="side-label">Side A</div>
+    ${album.tracks.slice(0,6).map((t,i) => tr(t,i)).join('')}
+    <div class="side-label">Side B</div>
+    ${album.tracks.slice(6).map((t,i) => tr(t,i+6)).join('')}
+    <div class="producer-notes">
+      <h4>// Producersnotitie</h4>
+      <p>${album.producerNote}</p>
+    </div>
+    <div class="shuffle-note">Klik opnieuw voor een andere versie binnen deze sfeer</div>`;
+
+  c.classList.remove('visible');
+  void c.offsetWidth;
+  c.classList.add('visible');
+  c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Init
+// ═══════════════════════════════════════════════════════════════════════════
+(async () => {
+  const stored = SP.clientId();
+  if (stored) document.getElementById('cidInput').value = stored;
+  try { await SP.handleCallback(); } catch(e) { alert(e.message); }
+  updateSpotifyUI();
+})();
+</script>
+</body>
+</html>
