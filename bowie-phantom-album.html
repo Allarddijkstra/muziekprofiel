@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>David Bowie — The Phantom Album</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap');
+  :root{
+    --ivory:#f0ead8;--gold:#c9a84c;--electric:#4a90d9;
+    --deep:#080610;--ink:#111020;--layer:#1a1828;
+    --groove:#2a2840;--muted:#7a7898;--accent:#e85d9a;
+    --sp:#1db954;--sp-dark:#158a3e;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--deep);color:var(--ivory);font-family:'DM Mono',monospace;min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background:
+    radial-gradient(1px 1px at 10% 15%,rgba(255,255,255,.15) 0%,transparent 100%),
+    radial-gradient(1px 1px at 30% 40%,rgba(255,255,255,.1) 0%,transparent 100%),
+    radial-gradient(1px 1px at 55% 8%,rgba(255,255,255,.12) 0%,transparent 100%),
+    radial-gradient(1px 1px at 80% 65%,rgba(255,255,255,.08) 0%,transparent 100%);
+    pointer-events:none;z-index:0;}
+  header{border-bottom:1px solid var(--groove);padding:3rem 4rem 2.5rem;position:relative;overflow:hidden;z-index:1;}
+  header::before{content:'';position:absolute;top:-60px;right:-80px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(74,144,217,.08),transparent 70%);pointer-events:none;}
+  header::after{content:'BOWIE';position:absolute;right:-5px;top:0;font-family:'Playfair Display',serif;font-size:180px;font-weight:900;color:rgba(201,168,76,.04);pointer-events:none;line-height:1;}
+  .band-label{font-size:.6rem;letter-spacing:.35em;color:var(--gold);text-transform:uppercase;margin-bottom:.6rem;}
+  h1{font-family:'Playfair Display',serif;font-size:clamp(3rem,8vw,6.5rem);font-weight:900;line-height:.88;letter-spacing:-.02em;}
+  h1 em{font-style:italic;color:var(--gold);}
+  .subtitle{margin-top:1rem;font-size:.68rem;color:var(--muted);letter-spacing:.1em;max-width:480px;line-height:2;}
+  main{max-width:1100px;margin:0 auto;padding:2.5rem 2rem;position:relative;z-index:1;}
+
+  /* ── Spotify Panel ── */
+  .sp-panel{background:var(--ink);border:1px solid var(--groove);border-left:3px solid var(--groove);padding:1.2rem 1.5rem;margin-bottom:2.5rem;transition:border-color .3s;}
+  .sp-panel.connected{border-left-color:var(--sp);}
+  .sp-panel.warning{border-left-color:var(--accent);}
+  .sp-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+  .sp-label{font-size:.6rem;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;white-space:nowrap;flex-shrink:0;}
+  .sp-input{background:var(--layer);border:1px solid var(--groove);color:var(--ivory);font-family:'DM Mono',monospace;font-size:.68rem;padding:.45rem .85rem;flex:1;min-width:160px;letter-spacing:.04em;}
+  .sp-input:focus{outline:none;border-color:var(--gold);}
+  .sp-btn{background:var(--sp);border:none;color:#000;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.14em;padding:.45rem 1.1rem;cursor:pointer;text-transform:uppercase;font-weight:700;white-space:nowrap;transition:background .2s;}
+  .sp-btn:hover{background:var(--sp-dark);}
+  .sp-btn:disabled{opacity:.45;cursor:not-allowed;}
+  .sp-btn.ghost{background:transparent;border:1px solid var(--sp);color:var(--sp);font-weight:400;}
+  .sp-btn.ghost:hover{background:rgba(29,185,84,.1);}
+  .sp-status.ok{color:var(--sp);font-size:.62rem;letter-spacing:.12em;}
+  .sp-hint{font-size:.56rem;color:var(--muted);margin-top:.5rem;line-height:1.6;}
+  .sp-hint code{color:var(--electric);font-family:'DM Mono',monospace;}
+
+  /* ── Controls ── */
+  .controls{display:flex;gap:.75rem;align-items:center;margin-bottom:3rem;flex-wrap:wrap;}
+  .vibe-label{font-size:.6rem;letter-spacing:.25em;color:var(--muted);text-transform:uppercase;}
+  .vibe-btn{background:transparent;border:1px solid var(--groove);color:var(--muted);font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.12em;padding:.5rem 1.1rem;cursor:pointer;text-transform:uppercase;transition:all .2s;}
+  .vibe-btn:hover{border-color:var(--gold);color:var(--gold);}
+  .vibe-btn.active{background:var(--gold);border-color:var(--gold);color:var(--deep);}
+  .gen-btn{background:transparent;border:1px solid var(--electric);color:var(--electric);font-family:'Playfair Display',serif;font-size:.9rem;font-style:italic;letter-spacing:.1em;padding:.6rem 1.8rem;cursor:pointer;transition:all .25s;margin-left:auto;}
+  .gen-btn:hover{background:var(--electric);color:var(--deep);}
+
+  /* ── Album ── */
+  .album-container{display:none;}
+  .album-container.visible{display:block;animation:fadeUp .6s ease forwards;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  .album-header{display:grid;grid-template-columns:280px 1fr;gap:3.5rem;margin-bottom:3rem;align-items:start;}
+  .album-cover{width:280px;height:280px;background:var(--ink);border:1px solid var(--groove);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;flex-shrink:0;}
+  .album-cover::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(74,144,217,.12),transparent 60%),radial-gradient(circle at 70% 70%,rgba(232,93,154,.08),transparent 60%);}
+  .album-cover::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 22px,rgba(201,168,76,.025) 22px,rgba(201,168,76,.025) 23px);}
+  .cover-inner{position:relative;z-index:2;text-align:center;padding:1.5rem;}
+  .cover-icon{font-size:3.5rem;line-height:1;margin-bottom:.8rem;display:block;}
+  .cover-title{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--ivory);line-height:1.2;}
+  .cover-artist{font-size:.5rem;letter-spacing:.35em;color:var(--gold);margin-top:.4rem;text-transform:uppercase;}
+  .album-meta h2{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3.5rem);font-weight:900;line-height:.9;letter-spacing:-.02em;margin-bottom:.6rem;}
+  .album-meta h2 em{font-style:italic;color:var(--gold);}
+  .album-tagline{font-size:.6rem;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;margin-bottom:1.5rem;}
+  .album-concept{font-size:.72rem;line-height:1.95;border-left:2px solid var(--gold);padding-left:1.1rem;color:var(--ivory);max-width:480px;}
+  .album-stats{display:flex;gap:2rem;margin-top:1.5rem;flex-wrap:wrap;}
+  .stat-val{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--electric);line-height:1;display:block;}
+  .stat-label{font-size:.5rem;color:var(--muted);letter-spacing:.22em;text-transform:uppercase;}
+
+  .sp-action{margin-top:1.2rem;display:flex;flex-direction:column;gap:.5rem;align-items:flex-start;}
+  .sp-add-btn{display:none;align-items:center;gap:.5rem;background:var(--sp);border:none;color:#000;font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.12em;padding:.55rem 1.2rem;cursor:pointer;text-transform:uppercase;font-weight:700;transition:background .2s;}
+  .sp-add-btn.show{display:flex;}
+  .sp-add-btn:hover{background:var(--sp-dark);}
+  .sp-add-btn:disabled{opacity:.45;cursor:not-allowed;}
+  .sp-feedback{font-size:.63rem;padding:.5rem .8rem;border:1px solid transparent;display:none;}
+  .sp-feedback.show{display:block;}
+  .sp-feedback.ok{border-color:var(--sp);color:var(--sp);}
+  .sp-feedback.err{border-color:var(--accent);color:var(--accent);}
+  .sp-feedback a{color:inherit;}
+  .sp-attribution{font-size:.52rem;display:block;margin-top:.2rem;}
+  .sp-attribution a{color:var(--sp);text-decoration:none;}
+
+  .tracklist-header{display:flex;align-items:center;gap:1rem;margin-bottom:.5rem;border-top:1px solid var(--groove);padding-top:2.5rem;}
+  .tracklist-header h3{font-family:'Playfair Display',serif;font-size:1rem;font-style:italic;letter-spacing:.08em;color:var(--gold);white-space:nowrap;}
+  .tracklist-header .line{flex:1;height:1px;background:var(--groove);}
+  .side-label{font-size:.6rem;letter-spacing:.3em;color:var(--electric);margin:1.8rem 0 .3rem;text-transform:uppercase;display:flex;align-items:center;gap:1rem;}
+  .side-label::after{content:'';flex:1;height:1px;background:var(--electric);opacity:.2;}
+  .track{display:grid;grid-template-columns:38px 1fr auto;gap:1rem;align-items:start;padding:1.1rem .5rem;border-bottom:1px solid rgba(42,40,64,.8);transition:background .15s;}
+  .track:hover{background:rgba(74,144,217,.04);}
+  .track-num{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--gold);opacity:.35;line-height:1;padding-top:3px;}
+  .track-title{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--ivory);line-height:1.1;margin-bottom:.2rem;}
+  .track-from{font-size:.55rem;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.3rem;}
+  .track-why{font-size:.64rem;color:rgba(240,234,216,.5);line-height:1.8;font-style:italic;}
+  .track-duration{font-size:.66rem;color:var(--muted);font-variant-numeric:tabular-nums;padding-top:4px;white-space:nowrap;}
+  .producer-notes{margin-top:2.5rem;background:var(--ink);border:1px solid var(--groove);border-left:3px solid var(--accent);padding:1.8rem 2rem;}
+  .producer-notes h4{font-family:'Playfair Display',serif;font-size:.9rem;font-style:italic;letter-spacing:.1em;color:var(--accent);margin-bottom:.8rem;}
+  .producer-notes p{font-size:.68rem;line-height:2;color:var(--ivory);font-style:italic;}
+  .shuffle-note{font-size:.55rem;color:var(--groove);letter-spacing:.12em;text-align:right;margin-top:1.5rem;text-transform:uppercase;}
+
+  @media(max-width:640px){
+    header{padding:2rem 1.5rem;}main{padding:2rem 1rem;}
+    .album-header{grid-template-columns:1fr;}.album-cover{width:100%;height:220px;}
+    .controls{gap:.5rem;}.gen-btn{margin-left:0;width:100%;}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="band-label">David Bowie · Phantomalbum Generator</div>
+  <h1>THE <em>PHANTOM</em><br>ALBUM</h1>
+  <p class="subtitle">Twintig studioalbums. Vijftig jaar metamorfose. Van Ziggy tot Blackstar — alles ligt op de band. Kies een sfeer, de machine maakt de keuze.</p>
+</header>
+<main>
+
+  <div class="sp-panel" id="spPanel">
+    <div class="sp-row" id="spLoginRow">
+      <span class="sp-label">Spotify</span>
+      <input class="sp-input" id="cidInput" placeholder="Plak je Spotify Client ID hier…" />
+      <button class="sp-btn" onclick="doLogin()">Verbinden</button>
+    </div>
+    <div id="spConnectedRow" style="display:none">
+      <div class="sp-row">
+        <span class="sp-label">Spotify</span>
+        <span class="sp-status ok" id="spStatusText">✓ Verbonden</span>
+        <button class="sp-btn ghost" onclick="doLogout()">Uitloggen</button>
+      </div>
+    </div>
+    <div class="sp-hint" id="spHint"></div>
+  </div>
+
+  <div class="controls">
+    <span class="vibe-label">Sfeer:</span>
+    <button class="vibe-btn active" data-vibe="glam">Glam &amp; Theater</button>
+    <button class="vibe-btn" data-vibe="berlin">Berlijn &amp; Avant-garde</button>
+    <button class="vibe-btn" data-vibe="soul">Soul &amp; Groove</button>
+    <button class="vibe-btn" data-vibe="dark">Duister &amp; Einde</button>
+    <button class="gen-btn" onclick="generateAlbum()">&#9654; Stel album samen</button>
+  </div>
+
+  <div class="album-container" id="albumContainer"></div>
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// Spotify PKCE Client (compliant: PKCE flow, /items endpoint, token refresh,
+//                      exponential backoff + Retry-After, full error handling)
+// ═══════════════════════════════════════════════════════════════════════════
+const SP = (() => {
+  const PFX = 'bw_';
+  const k = n => PFX + n;
+  const SCOPES = 'playlist-modify-public playlist-modify-private';
+
+  function redirectUri() {
+    const uri = window.location.origin + window.location.pathname;
+    if (location.protocol !== 'https:' && !/^127\.0\.0\.1/.test(location.hostname))
+      console.warn('[Spotify] Redirect URI moet HTTPS zijn voor productie.');
+    return uri;
+  }
+
+  async function rand32() {
+    const a = new Uint8Array(32); crypto.getRandomValues(a);
+    return btoa(String.fromCharCode(...a)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+  }
+  async function sha256b64url(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+  }
+
+  async function login(clientId) {
+    localStorage.setItem(k('cid'), clientId);
+    const v = await rand32();
+    localStorage.setItem(k('v'), v);
+    const challenge = await sha256b64url(v);
+    const params = new URLSearchParams({
+      client_id: clientId, response_type: 'code',
+      redirect_uri: redirectUri(), scope: SCOPES,
+      code_challenge_method: 'S256', code_challenge: challenge
+    });
+    window.location = 'https://accounts.spotify.com/authorize?' + params;
+  }
+
+  async function _saveTokens(r) {
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error_description || d.error || `HTTP ${r.status}`);
+    localStorage.setItem(k('token'), d.access_token);
+    localStorage.setItem(k('exp'),   Date.now() + (d.expires_in - 60) * 1000);
+    if (d.refresh_token) localStorage.setItem(k('refresh'), d.refresh_token);
+  }
+
+  async function _exchange(code) {
+    const r = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST', headers: {'Content-Type':'application/x-www-form-urlencoded'},
+      body: new URLSearchParams({ grant_type:'authorization_code', code,
+        redirect_uri: redirectUri(), client_id: localStorage.getItem(k('cid')),
+        code_verifier: localStorage.getItem(k('v')) })
+    });
+    await _saveTokens(r);
+  }
+
+  async function _refresh() {
+    const rt = localStorage.getItem(k('refresh'));
+    if (!rt) throw new Error('Sessie verlopen. Log opnieuw in.');
+    const r = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST', headers: {'Content-Type':'application/x-www-form-urlencoded'},
+      body: new URLSearchParams({ grant_type:'refresh_token', refresh_token: rt,
+        client_id: localStorage.getItem(k('cid')) })
+    });
+    await _saveTokens(r);
+  }
+
+  async function _token() {
+    const t = localStorage.getItem(k('token'));
+    const e = parseInt(localStorage.getItem(k('exp')) || '0');
+    if (t && Date.now() < e) return t;
+    await _refresh();
+    return localStorage.getItem(k('token'));
+  }
+
+  async function api(endpoint, opts = {}, attempt = 0) {
+    const token = await _token();
+    const res = await fetch('https://api.spotify.com/v1' + endpoint, {
+      ...opts,
+      headers: { 'Authorization': 'Bearer ' + token,
+                 'Content-Type': 'application/json', ...(opts.headers||{}) }
+    });
+
+    if (res.status === 429) {
+      if (attempt >= 4) throw new Error('Spotify rate limit — probeer het later opnieuw.');
+      const retryAfter = parseInt(res.headers.get('Retry-After') || '1');
+      await new Promise(r => setTimeout(r, retryAfter * 1000 * Math.pow(2, attempt)));
+      return api(endpoint, opts, attempt + 1);
+    }
+
+    if (res.status === 204) return {};
+    const data = await res.json();
+    if (!res.ok) {
+      const msg = data?.error?.message || `HTTP ${res.status}`;
+      if (res.status === 401) throw new Error('Sessie verlopen — log opnieuw in. (' + msg + ')');
+      if (res.status === 403) throw new Error('Toegang geweigerd — controleer je app-scopes. (' + msg + ')');
+      if (res.status === 404) throw new Error('Niet gevonden: ' + msg);
+      throw new Error(`Spotify fout ${res.status}: ${msg}`);
+    }
+    return data;
+  }
+
+  async function handleCallback() {
+    const p = new URLSearchParams(location.search);
+    if (p.get('error')) throw new Error('Login geweigerd: ' + p.get('error'));
+    if (!p.get('code')) return false;
+    await _exchange(p.get('code'));
+    history.replaceState({}, '', location.pathname);
+    return true;
+  }
+
+  function logout() {
+    ['token','exp','refresh','v'].forEach(n => localStorage.removeItem(k(n)));
+  }
+
+  const isConnected  = () => !!localStorage.getItem(k('token'));
+  const clientId     = () => localStorage.getItem(k('cid')) || '';
+  const getRedirectUri = redirectUri;
+
+  async function searchTrack(title, artist) {
+    const q = encodeURIComponent(`track:${title} artist:${artist}`);
+    const d = await api(`/search?q=${q}&type=track&limit=1`);
+    return d.tracks?.items?.[0]?.uri ?? null;
+  }
+
+  async function createPlaylist(name, description) {
+    const me = await api('/me');
+    // POST /me/playlists — /users/{id}/playlists verwijderd feb 2026
+    return api('/me/playlists', {
+      method: 'POST',
+      body: JSON.stringify({ name, description, public: false })
+    });
+  }
+
+  // /playlists/{id}/items — niet de deprecated /tracks endpoint
+  async function addItems(playlistId, uris) {
+    for (let i = 0; i < uris.length; i += 100) {
+      await api(`/playlists/${playlistId}/items`, {
+        method: 'POST',
+        body: JSON.stringify({ uris: uris.slice(i, i + 100) })
+      });
+    }
+  }
+
+  return { login, handleCallback, logout, isConnected, clientId,
+           getRedirectUri, searchTrack, createPlaylist, addItems };
+})();
+
+// ═══════════════════════════════════════════════════════════════════════════
+// UI
+// ═══════════════════════════════════════════════════════════════════════════
+function updateSpotifyUI() {
+  const ok = SP.isConnected();
+  document.getElementById('spLoginRow').style.display     = ok ? 'none' : '';
+  document.getElementById('spConnectedRow').style.display = ok ? '' : 'none';
+  document.getElementById('spPanel').className = 'sp-panel' + (ok ? ' connected' : '');
+  const hint = document.getElementById('spHint');
+  if (!ok) {
+    const uri = SP.getRedirectUri();
+    const secure = location.protocol === 'https:' || /^127\.0\.0\.1/.test(location.hostname);
+    hint.innerHTML = `Redirect URI voor Spotify Dashboard: <code>${uri}</code>`
+      + (!secure ? '<br><span style="color:var(--accent)">⚠ Gebruik HTTPS voor productie.</span>' : '');
+    if (!secure) document.getElementById('spPanel').classList.add('warning');
+  } else { hint.textContent = ''; }
+  const btn = document.getElementById('spAddBtn');
+  if (btn) btn.classList.toggle('show', ok);
+}
+
+function doLogin() {
+  const cid = document.getElementById('cidInput').value.trim();
+  if (!cid) { alert('Vul je Spotify Client ID in.'); return; }
+  SP.login(cid).catch(e => alert(e.message));
+}
+
+function doLogout() { SP.logout(); updateSpotifyUI(); }
+
+async function doAddToSpotify() {
+  const btn = document.getElementById('spAddBtn');
+  const fb  = document.getElementById('spFeedback');
+  btn.disabled = true; btn.textContent = 'Bezig…';
+  fb.className = 'sp-feedback'; fb.style.display = 'none';
+  try {
+    const { tracks, albumTitle } = window.__album__;
+    const pl = await SP.createPlaylist(
+      'Bowie — ' + albumTitle,
+      'Phantom Album samengesteld via The Phantom Album App'
+    );
+    const uris = [];
+    for (const t of tracks) {
+      const uri = await SP.searchTrack(t.title, 'David Bowie');
+      if (uri) uris.push(uri);
+    }
+    await SP.addItems(pl.id, uris);
+    const url = pl.external_urls?.spotify || '#';
+    fb.innerHTML = `✓ Playlist aangemaakt! ${uris.length}/${tracks.length} nummers gevonden. `
+      + `<a href="${url}" target="_blank" rel="noopener">Open in Spotify ↗</a>`
+      + `<span class="sp-attribution">Muziekdata door <a href="https://www.spotify.com" target="_blank" rel="noopener">Spotify</a></span>`;
+    fb.className = 'sp-feedback show ok';
+  } catch(e) {
+    fb.textContent = '✗ ' + e.message;
+    fb.className   = 'sp-feedback show err';
+  }
+  btn.disabled = false; btn.textContent = '▶ Toevoegen aan Spotify';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Album data
+// ═══════════════════════════════════════════════════════════════════════════
+const ALBUMS = {
+  glam:[
+    {albumTitle:"Starman's Wardrobe",tagline:"Het theater was nooit het masker. Het masker was de waarheid.",icon:"⭐",
+     concept:"Een album dat de theatrale kern van Bowie's glam-jaren destilleert. Ziggy Stardust, Aladdin Sane en Diamond Dogs samengesmolten tot één grote, schaamteloze performance.",
+     producerNote:"We vroegen ons af wat er zou zijn als Bowie in 1974 had beslist om alle personages op één plaat samen te zetten. Dit is het antwoord.",
+     tracks:[
+       {title:"Ziggy Stardust",album:"The Rise and Fall of Ziggy Stardust (1972)",duration:"3:13",why:"De mythologische opener — het begin van het personage dat alles veranderde."},
+       {title:"Panic in Detroit",album:"Aladdin Sane (1973)",duration:"4:26",why:"Rock als theater, theater als politiek — Bowie op zijn meest cinematografisch."},
+       {title:"Diamond Dogs",album:"Diamond Dogs (1974)",duration:"5:56",why:"Dystopische glamrock die klinkt als een Broadway-opening voor een post-apocalyptische musical."},
+       {title:"Moonage Daydream",album:"The Rise and Fall of Ziggy Stardust (1972)",duration:"4:37",why:"Mick Ronson's gitaar als ruimteschip — het meest buitenaards klinkende nummer."},
+       {title:"Watch That Man",album:"Aladdin Sane (1973)",duration:"4:27",why:"Luid, chaotisch en heerlijk onbeheerst — het meest rollende van de glamperiode."},
+       {title:"Cracked Actor",album:"Aladdin Sane (1973)",duration:"2:56",why:"Compact en cynisch — de glamour die zichzelf doorziet als illusie."},
+       {title:"Sweet Thing",album:"Diamond Dogs (1974)",duration:"5:10",why:"Het operatische hartstuk van Diamond Dogs — Bowie op zijn meest dramatisch."},
+       {title:"Starman",album:"The Rise and Fall of Ziggy Stardust (1972)",duration:"4:09",why:"De single die alles veranderde — kosmisch, popliedachtig en onvergankelijk."},
+       {title:"The Jean Genie",album:"Aladdin Sane (1973)",duration:"4:05",why:"Blues als glam, glam als blues — een van de directste riffs in zijn catalogus."},
+       {title:"Drive-In Saturday",album:"Aladdin Sane (1973)",duration:"4:30",why:"Retrofuturisme vol nostalgie — klinkt als een herinnering aan een toekomst die nooit was."},
+       {title:"Rock 'n' Roll Suicide",album:"The Rise and Fall of Ziggy Stardust (1972)",duration:"2:57",why:"De dood van Ziggy — dramatisch, ontroerend en theatraal als een laatste buiging."},
+       {title:"Big Brother",album:"Diamond Dogs (1974)",duration:"3:21",why:"Orwelliaans en groots — de finale die een nieuw hoofdstuk aankondigt."}
+     ]},
+    {albumTitle:"Alien Transmission",tagline:"Ontvangen van een frequentie die niet bestaat.",icon:"👾",
+     concept:"De buitenaardse kant van Bowie — niet de kostuums maar de klank. Dit album haalt de nummers op waarin Bowie werkelijk niet van deze aarde leek.",
+     producerNote:"Bowie was altijd het meest interessant als hij deed alsof hij van buitenaf naar de mensheid keek. Dit album verzamelt de momenten waarop die blik het scherpst was.",
+     tracks:[
+       {title:"Life on Mars?",album:"Hunky Dory (1971)",duration:"3:48",why:"De meest iconische Bowie-vraag — existentieel, cinematografisch, onontkoombaar."},
+       {title:"Moonage Daydream",album:"The Rise and Fall of Ziggy Stardust (1972)",duration:"4:37",why:"Ruimterock als manifesto — klinkt letterlijk als een ander zonnestelsel."},
+       {title:"Warszawa",album:"Low (1977)",duration:"6:21",why:"Eno en Bowie creëren een taal die niet bestaat — het meest buitenaardse wat hij maakte."},
+       {title:"TVC 15",album:"Station to Station (1976)",duration:"5:33",why:"Televisie als buitenaards fenomeen — absurdistisch en onbegrijpelijk mooi."},
+       {title:"Loving the Alien",album:"Tonight (1984)",duration:"7:11",why:"Synthpop als religie — Bowie op zijn meest filosofisch vervreemdend."},
+       {title:"Width of a Circle",album:"The Man Who Sold the World (1970)",duration:"8:04",why:"Acht minuten heavy proto-prog — vroeg bewijs dat Bowie buiten de aarde dacht."},
+       {title:"Subterraneans",album:"Low (1977)",duration:"5:38",why:"De muziek van een verlaten stad op een andere planeet — Eno op zijn diepst."},
+       {title:"African Night Flight",album:"Lodger (1979)",duration:"3:03",why:"Chaotisch en onbegrijpelijk — een transmissie die halverwege wordt onderbroken."},
+       {title:"Always Crashing in the Same Car",album:"Low (1977)",duration:"3:32",why:"Een alien die zijn repetitieve lot begrijpt maar niet kan ontsnappen."},
+       {title:"Blackout",album:"Heroes (1977)",duration:"3:47",why:"Panisch en gedesoriënteerd — de mensheid gezien door een oog dat te veel heeft gezien."},
+       {title:"Bring Me the Disco King",album:"Reality (2003)",duration:"7:54",why:"Jazz, leegte en het einde van een tijdperk — één van zijn laatste grote statements."},
+       {title:"The Supermen",album:"The Man Who Sold the World (1970)",duration:"3:38",why:"Nietzsche als heavy rock — zijn vroegste buitenaardse moment."}
+     ]}
+  ],
+  berlin:[
+    {albumTitle:"Kalter Wind",tagline:"De muur staat. De muziek weet niet waarheen.",icon:"❄",
+     concept:"De kille schoonheid van de Berlijnse trilogie — ambient, angst en leegte, maar ook de vreemde hoop van iemand die zichzelf opnieuw uitvond in een gebroken stad.",
+     producerNote:"Bowie vluchtte naar Berlijn om te ontsnappen aan zijn eigen legende. Hij vond er Brian Eno, een stad in tweeën, en een nieuwe muzikale taal.",
+     tracks:[
+       {title:"Station to Station",album:"Station to Station (1976)",duration:"10:14",why:"De brug tussen Ziggy en Berlijn — tien minuten transformatie in real time."},
+       {title:"Speed of Life",album:"Low (1977)",duration:"2:46",why:"De opener van Low: instrumentaal, futuristisch, een nieuwe taal die begint."},
+       {title:"Heroes",album:"Heroes (1977)",duration:"6:07",why:"Het meest menselijke wat hij maakte — liefde naast een muur die mensen scheidt."},
+       {title:"What in the World",album:"Low (1977)",duration:"2:23",why:"Koud en compact — Iggy Pop fluistert mee in de coulissen."},
+       {title:"Sense of Doubt",album:"Heroes (1977)",duration:"3:57",why:"Ambient als existentiële crisis — vier noten die de leegte van Berlijn beschrijven."},
+       {title:"Breaking Glass",album:"Low (1977)",duration:"1:52",why:"Twee minuten perfecte spanning — het kortste statement op het album."},
+       {title:"Neuköln",album:"Heroes (1977)",duration:"4:35",why:"Saxofoon als eenzaamheid — klinkt als de immigrantenwijk waarnaar het is vernoemd."},
+       {title:"Sons of the Silent Age",album:"Heroes (1977)",duration:"3:34",why:"Melodieuzer dan de rest, maar even koud — een melodie door ijzige lucht."},
+       {title:"Be My Wife",album:"Low (1977)",duration:"2:58",why:"Een smekend popliedje midden in het experiment — menselijkheid in een mechanische wereld."},
+       {title:"Moss Garden",album:"Heroes (1977)",duration:"4:57",why:"Koto en synthesizer — de stilste en mooiste plek in de trilogie."},
+       {title:"Weeping Wall",album:"Low (1977)",duration:"4:01",why:"Minimalistisch en ontroerend — de muur, het verdriet, de stilte erna."},
+       {title:"Subterraneans",album:"Low (1977)",duration:"5:38",why:"Saxofoon door een halflege stad — stil en onbegrijpelijk mooi als afsluiter."}
+     ]},
+    {albumTitle:"Lodger's Dream",tagline:"Overal een vreemdeling. Nergens een huis.",icon:"🏠",
+     concept:"Lodger is het meest onderschatte album uit de Berlijnse periode — wereldmuziek, post-punk en ongemak in één. Dit phantom album zet Lodger centraal.",
+     producerNote:"Terwijl Low en Heroes de roem kregen, was Lodger het meest avontuurlijk. Oblique strategy-kaarten, onconventionele stemmingen, wereldinvloeden die zijn tijd ver vooruit waren.",
+     tracks:[
+       {title:"DJ",album:"Lodger (1979)",duration:"3:59",why:"Post-punk als dansplaat — het meest directe nummer dat Lodger te bieden heeft."},
+       {title:"Red Sails",album:"Lodger (1979)",duration:"3:44",why:"Krautrock-energie met exotische invloeden — de motor van het album."},
+       {title:"Boys Keep Swinging",album:"Lodger (1979)",duration:"3:17",why:"De bandleden speelden elkaars instrumenten — het klinkt precies zo, en het werkt perfect."},
+       {title:"Always Crashing in the Same Car",album:"Low (1977)",duration:"3:32",why:"Repetitief en hypnotisch — de mentale gevangenis als groove."},
+       {title:"Fantastic Voyage",album:"Lodger (1979)",duration:"2:54",why:"Fragiel en schoon — een van de mooiste melodieën die hij in Berlijn schreef."},
+       {title:"Sound and Vision",album:"Low (1977)",duration:"3:05",why:"De perfecte single uit de Low-periode — kaal, strak en onweerstaanbaar."},
+       {title:"Move On",album:"Lodger (1979)",duration:"3:19",why:"De melodie van Space Oddity achterstevoren — obsessief, reizend, ontheemd."},
+       {title:"Repetition",album:"Lodger (1979)",duration:"3:35",why:"Ongemakkelijk en klinisch — een huiselijk drama als koude statistiek."},
+       {title:"V-2 Schneider",album:"Heroes (1977)",duration:"3:10",why:"Een eerbetoon aan Florian Schneider — instrumentaal en hypnotisch strak."},
+       {title:"Look Back in Anger",album:"Lodger (1979)",duration:"3:07",why:"Urgent en rockend — het meest conventioneel agressieve van de Berlijnse jaren."},
+       {title:"Yassassin",album:"Lodger (1979)",duration:"4:10",why:"Turks-getinte pop als metafoor voor het multiculturele Berlijn."},
+       {title:"Subterraneans",album:"Low (1977)",duration:"5:38",why:"De perfecte afsluiter — stil, vreemd, onbegrijpelijk mooi."}
+     ]}
+  ],
+  soul:[
+    {albumTitle:"Plastic Soul Machine",tagline:"Wit, Brits en compleet geobsedeerd door Philly.",icon:"🎷",
+     concept:"Bowie die zichzelf opnieuw uitvond als soulzanger — en het bijna voor elkaar kreeg. Young Americans en Station to Station als kern.",
+     producerNote:"Hij noemde het zelf 'plastic soul'. Maar de platen spreken voor zich: brede productie, gospelachterlichten, saxofoons en oprechte grooves.",
+     tracks:[
+       {title:"Young Americans",album:"Young Americans (1975)",duration:"5:10",why:"De definitie van plastic soul — een ode aan Amerika van iemand die het nooit helemaal begreep."},
+       {title:"Golden Years",album:"Station to Station (1976)",duration:"4:03",why:"Disco-funk als Bowie-product — de meest vloeiende groove in zijn catalogus."},
+       {title:"Fame",album:"Young Americans (1975)",duration:"4:12",why:"Samen met Lennon geschreven — nummer 1 en een onweerstaanbaar riff."},
+       {title:"TVC 15",album:"Station to Station (1976)",duration:"5:33",why:"Ongegeneerd groovend en toch volkomen vreemd — de contradictie die Bowie beheerste."},
+       {title:"Win",album:"Young Americans (1975)",duration:"4:45",why:"Fluisterend en warm — de meest intieme kant van zijn soulperiode."},
+       {title:"Stay",album:"Station to Station (1976)",duration:"6:12",why:"Carlos Alomar op zijn absolute best — zes minuten functionele funk."},
+       {title:"Right",album:"Young Americans (1975)",duration:"4:17",why:"Strakke ritmes en backing vocals die Philly soul ademen — ondergewaardeerd pareltje."},
+       {title:"Wild Is the Wind",album:"Station to Station (1976)",duration:"5:57",why:"Nina Simone gecoverd en tot iets groters gemaakt — vocale beheersing op zijn top."},
+       {title:"Across the Universe",album:"Young Americans (1975)",duration:"4:30",why:"Beatles herdacht als soulplaat — bewust lui, bewust mooi."},
+       {title:"Word on a Wing",album:"Station to Station (1976)",duration:"6:04",why:"Gospel en grandeur — Bowie die oprecht gelooft in wat hij zingt."},
+       {title:"Fascination",album:"Young Americans (1975)",duration:"5:37",why:"Luther Vandross schreef mee — glad, warm, onweerstaanbaar."},
+       {title:"Sister Midnight",album:"The Idiot (Iggy Pop, 1977)",duration:"4:12",why:"Bowie schreef en produceerde dit voor Iggy — klinkt als het betere Young Americans."}
+     ]}
+  ],
+  dark:[
+    {albumTitle:"The Last Transmission",tagline:"Hij wist het. Wij niet.",icon:"✦",
+     concept:"Blackstar verscheen twee dagen voor zijn dood. The Next Day na tien jaar stilte. Dit album behandelt de late Bowie als één coherent afscheid.",
+     producerNote:"Terugluisteren naar Bowie's laatste platen wetend wat we nu weten is een bijzondere ervaring. De dood was altijd een thema bij Bowie. Blackstar maakte het definitief.",
+     tracks:[
+       {title:"Blackstar",album:"Blackstar (2016)",duration:"9:57",why:"Zijn testament in muziekvorm — tien minuten die alles zeggen en niets verklaren."},
+       {title:"Lazarus",album:"Blackstar (2016)",duration:"6:22",why:"Geschreven als afscheid, gefilmd als afscheid — het meest expliciete vaarwel in rockhistorie."},
+       {title:"Where Are We Now?",album:"The Next Day (2013)",duration:"4:35",why:"De terugkeer na tien jaar — nostalgisch, kwetsbaar en vol rouw om een stad."},
+       {title:"Dollar Days",album:"Blackstar (2016)",duration:"4:44",why:"Akoestisch en intiem — Bowie zingt over het opgeven van dromen."},
+       {title:"Rock 'n' Roll Suicide",album:"The Rise and Fall of Ziggy Stardust (1972)",duration:"2:57",why:"Zijn eerste grote dood — Ziggy stierf altijd al; nu weten we het was repetitie."},
+       {title:"Heat",album:"The Next Day (2013)",duration:"4:24",why:"Donker, tergend traag en onheilspellend — het meest sinistere van The Next Day."},
+       {title:"I Can't Give Everything Away",album:"Blackstar (2016)",duration:"5:09",why:"De laatste track op zijn laatste album — harmonica, hoop en einde tegelijk."},
+       {title:"Jump They Say",album:"Black Tie White Noise (1993)",duration:"4:22",why:"Over de zelfmoordpoging van zijn broer — Bowie schreef er dit ongemakkelijke dansje over."},
+       {title:"Sue (Or in a Season of Crime)",album:"The Next Day (2013)",duration:"6:44",why:"Jazz-avant-garde als moorddrama — zijn meest rauwe late compositie."},
+       {title:"Strangers When We Meet",album:"Outside (1995)",duration:"5:07",why:"Melancholisch en breed — een schoonheid die aanvoelt als de laatste keer."},
+       {title:"Heathen (The Rays)",album:"Heathen (2002)",duration:"4:03",why:"Post-9/11, post-alles — Bowie kijkt naar een wereld die niet meer zijn wereld is."},
+       {title:"I'm Afraid of Americans",album:"Earthling (1997)",duration:"5:00",why:"Met Trent Reznor — paranoia als dancefloor, angst als ritme."}
+     ]},
+    {albumTitle:"Outside Looking In",tagline:"De buitenstaander die altijd al wist hoe het zou eindigen.",icon:"🔭",
+     concept:"Bowie's donkere kant ging verder dan Blackstar. Outside, Earthling en de late albums lieten een man zien die zijn tijd ver voor was — en die prijs betaalde.",
+     producerNote:"De jaren negentig waren moeilijk voor Bowie — critici schreven hem af. En toch was hij productiever en avontuurlijker dan de meeste. Dit album eert die vergeten periode.",
+     tracks:[
+       {title:"The Hearts Filthy Lesson",album:"Outside (1995)",duration:"4:57",why:"Industriële openingssalvo — het meest Nine Inch Nails dat Bowie ooit klonk."},
+       {title:"I'm Afraid of Americans",album:"Earthling (1997)",duration:"5:00",why:"Paranoia als dancefloor-banger — zijn collaboratie met Reznor op zijn beste."},
+       {title:"Little Wonder",album:"Earthling (1997)",duration:"3:41",why:"Drum and bass Bowie — onverwacht catchy voor zijn meest experimentele decennium."},
+       {title:"Strangers When We Meet",album:"Outside (1995)",duration:"5:07",why:"Een van zijn mooiste late melodieën — bijna klassiek in zijn schoonheid."},
+       {title:"Law (Earthlings on Fire)",album:"Earthling (1997)",duration:"5:21",why:"Chaotisch en urgent — de band klinkt als een machine die zichzelf versnippert."},
+       {title:"A Small Plot of Land",album:"Outside (1995)",duration:"5:47",why:"Jazz-avant-garde en ongemak — het meest experimentele van Outside."},
+       {title:"Thursday's Child",album:"Hours... (1999)",duration:"5:27",why:"Reflectief en rustig na het geweld — Bowie kijkt terug met verdriet."},
+       {title:"Survive",album:"Hours... (1999)",duration:"4:11",why:"Hartverscheurend eenvoudig — de pijnlijkste zin die hij in de jaren negentig schreef."},
+       {title:"New Killer Star",album:"Reality (2003)",duration:"4:38",why:"Post-9/11 optimisme dat weet dat het kwetsbaar is."},
+       {title:"Slow Burn",album:"Heathen (2002)",duration:"4:43",why:"Tony Visconti terug — klinkt als een terugkeer naar wat Bowie altijd was."},
+       {title:"Everyone Says Hi",album:"Heathen (2002)",duration:"4:21",why:"Bowie laat de kwetsbaarheid gewoon liggen, zonder te verbergen."},
+       {title:"Slip Away",album:"Heathen (2002)",duration:"5:30",why:"De mooiste late ballade — nostalgie en zachtmoedig afscheid."}
+     ]}
+  ]
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Render
+// ═══════════════════════════════════════════════════════════════════════════
+const lastIdx = {};
+
+document.querySelectorAll('.vibe-btn').forEach(b =>
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.vibe-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+  })
+);
+
+function generateAlbum() {
+  const vibe = document.querySelector('.vibe-btn.active').dataset.vibe;
+  const pool = ALBUMS[vibe];
+  let idx = Math.floor(Math.random() * pool.length);
+  if (pool.length > 1 && idx === (lastIdx[vibe] ?? -1)) idx = (idx + 1) % pool.length;
+  lastIdx[vibe] = idx;
+  renderAlbum(pool[idx]);
+}
+
+function renderAlbum(album) {
+  window.__album__ = album;
+  const c = document.getElementById('albumContainer');
+  const totalMins = Math.floor(album.tracks.reduce((a,t) => {
+    const [m,s] = (t.duration||'4:00').split(':').map(Number);
+    return a + m*60 + (s||0);
+  }, 0) / 60);
+
+  const tr = (t, i) =>
+    `<div class="track">
+      <div class="track-num">${String(i+1).padStart(2,'0')}</div>
+      <div>
+        <div class="track-title">${t.title}</div>
+        <div class="track-from">van: ${t.album}</div>
+        <div class="track-why">${t.why}</div>
+      </div>
+      <div class="track-duration">${t.duration}</div>
+    </div>`;
+
+  const showSp = SP.isConnected() ? 'show' : '';
+
+  c.innerHTML = `
+    <div class="album-header">
+      <div class="album-cover">
+        <div class="cover-inner">
+          <span class="cover-icon">${album.icon}</span>
+          <div class="cover-title">${album.albumTitle}</div>
+          <div class="cover-artist">David Bowie</div>
+        </div>
+      </div>
+      <div class="album-meta">
+        <h2>David<br>Bowie<br><em>${album.albumTitle}</em></h2>
+        <div class="album-tagline">${album.tagline}</div>
+        <div class="album-concept">${album.concept}</div>
+        <div class="album-stats">
+          <div><span class="stat-val">${album.tracks.length}</span><span class="stat-label">Tracks</span></div>
+          <div><span class="stat-val">${totalMins}'</span><span class="stat-label">Speeltijd</span></div>
+          <div><span class="stat-val">20</span><span class="stat-label">Albums</span></div>
+        </div>
+        <div class="sp-action">
+          <button class="sp-add-btn ${showSp}" id="spAddBtn" onclick="doAddToSpotify()">▶ Toevoegen aan Spotify</button>
+          <div class="sp-feedback" id="spFeedback"></div>
+        </div>
+      </div>
+    </div>
+    <div class="tracklist-header"><h3>Tracklist</h3><div class="line"></div></div>
+    <div class="side-label">Side A</div>
+    ${album.tracks.slice(0,6).map((t,i) => tr(t,i)).join('')}
+    <div class="side-label">Side B</div>
+    ${album.tracks.slice(6).map((t,i) => tr(t,i+6)).join('')}
+    <div class="producer-notes">
+      <h4>// Producersnotitie</h4>
+      <p>${album.producerNote}</p>
+    </div>
+    <div class="shuffle-note">Klik opnieuw voor een andere versie binnen deze sfeer</div>`;
+
+  c.classList.remove('visible');
+  void c.offsetWidth;
+  c.classList.add('visible');
+  c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Init
+// ═══════════════════════════════════════════════════════════════════════════
+(async () => {
+  const stored = SP.clientId();
+  if (stored) document.getElementById('cidInput').value = stored;
+  try { await SP.handleCallback(); } catch(e) { alert(e.message); }
+  updateSpotifyUI();
+})();
+</script>
+</body>
+</html>
