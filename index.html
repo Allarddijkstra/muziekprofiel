@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Muzikaal Profiel</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Syne+Mono&display=swap');
+
+:root {
+  --bg:       #0a0a0a;
+  --surface:  #111111;
+  --border:   #1e1e1e;
+  --sp:       #1db954;
+  --sp-dim:   #145e30;
+  --text:     #f0f0e8;
+  --muted:    #555550;
+  --gold:     #d4a843;
+  --red:      #c94040;
+  --blue:     #4a7fd4;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Grid background ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Login screen ── */
+#loginScreen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  padding: 2rem;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 440px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 3rem 2.5rem;
+  position: relative;
+}
+
+.login-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--sp);
+}
+
+.login-logo {
+  font-size: .65rem;
+  letter-spacing: .4em;
+  color: var(--sp);
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+}
+
+.login-title {
+  font-size: 2.4rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: .5rem;
+}
+
+.login-sub {
+  font-family: 'Syne Mono', monospace;
+  font-size: .7rem;
+  color: var(--muted);
+  line-height: 1.8;
+  margin-bottom: 2.5rem;
+}
+
+.field-label {
+  font-size: .6rem;
+  letter-spacing: .2em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: .4rem;
+}
+
+.field-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'Syne Mono', monospace;
+  font-size: .75rem;
+  padding: .65rem .9rem;
+  margin-bottom: 1.5rem;
+  outline: none;
+  transition: border-color .2s;
+}
+
+.field-input:focus { border-color: var(--sp); }
+
+.login-btn {
+  width: 100%;
+  background: var(--sp);
+  border: none;
+  color: #000;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: .85rem;
+  letter-spacing: .1em;
+  padding: .85rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: background .2s;
+}
+
+.login-btn:hover { background: #22e065; }
+
+.redirect-hint {
+  font-family: 'Syne Mono', monospace;
+  font-size: .58rem;
+  color: var(--muted);
+  margin-top: 1.5rem;
+  line-height: 1.7;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+
+.redirect-hint strong {
+  color: var(--gold);
+  display: block;
+  margin-bottom: .3rem;
+}
+
+.redirect-uri {
+  color: var(--sp);
+  word-break: break-all;
+}
+
+/* ── App ── */
+#app {
+  display: none;
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+/* ── Header ── */
+.app-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.header-left {}
+
+.app-label {
+  font-family: 'Syne Mono', monospace;
+  font-size: .6rem;
+  letter-spacing: .3em;
+  color: var(--sp);
+  text-transform: uppercase;
+  margin-bottom: .5rem;
+}
+
+.user-name {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: .95;
+}
+
+.user-since {
+  font-family: 'Syne Mono', monospace;
+  font-size: .65rem;
+  color: var(--muted);
+  margin-top: .4rem;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Period tabs */
+.period-tabs {
+  display: flex;
+  gap: .3rem;
+}
+
+.period-tab {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: 'Syne Mono', monospace;
+  font-size: .6rem;
+  letter-spacing: .1em;
+  padding: .4rem .8rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all .2s;
+}
+
+.period-tab:hover { border-color: var(--sp); color: var(--sp); }
+.period-tab.active { background: var(--sp); border-color: var(--sp); color: #000; font-weight: 700; }
+
+.logout-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: 'Syne Mono', monospace;
+  font-size: .6rem;
+  padding: .4rem .8rem;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.logout-btn:hover { border-color: var(--red); color: var(--red); }
+
+/* ── Loading ── */
+#loadingState {
+  display: none;
+  text-align: center;
+  padding: 6rem 2rem;
+}
+
+.loader {
+  width: 40px; height: 40px;
+  border: 2px solid var(--border);
+  border-top-color: var(--sp);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  margin: 0 auto 1.5rem;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-text {
+  font-family: 'Syne Mono', monospace;
+  font-size: .7rem;
+  color: var(--muted);
+  letter-spacing: .15em;
+}
+
+/* ── Profile content ── */
+#profileContent { display: none; }
+
+/* ── Personality card ── */
+.personality-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--sp);
+  padding: 2rem 2.5rem;
+  margin-bottom: 2rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  align-items: center;
+}
+
+.personality-label {
+  font-family: 'Syne Mono', monospace;
+  font-size: .6rem;
+  letter-spacing: .25em;
+  color: var(--sp);
+  text-transform: uppercase;
+  margin-bottom: .5rem;
+}
+
+.personality-type {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: .6rem;
+}
+
+.personality-desc {
+  font-family: 'Syne Mono', monospace;
+  font-size: .7rem;
+  color: var(--muted);
+  line-height: 1.8;
+  max-width: 540px;
+}
+
+.personality-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 160px;
+}
+
+.pstat {
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+}
+
+.pstat-label {
+  font-family: 'Syne Mono', monospace;
+  font-size: .55rem;
+  letter-spacing: .15em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.pstat-bar-wrap {
+  background: var(--border);
+  height: 4px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.pstat-bar {
+  height: 100%;
+  background: var(--sp);
+  border-radius: 2px;
+  transition: width 1s ease;
+}
+
+.pstat-val {
+  font-family: 'Syne Mono', monospace;
+  font-size: .6rem;
+  color: var(--text);
+}
+
+/* ── Grid layout ── */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.profile-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+.profile-grid.full  { grid-template-columns: 1fr; }
+
+/* ── Section card ── */
+.section-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 1.8rem;
+}
+
+.section-title {
+  font-family: 'Syne Mono', monospace;
+  font-size: .6rem;
+  letter-spacing: .25em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+}
+
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── Artist list ── */
+.artist-list { display: flex; flex-direction: column; gap: .4rem; }
+
+.artist-row {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: .8rem;
+  padding: .6rem .4rem;
+  border-bottom: 1px solid var(--border);
+  transition: background .15s;
+}
+
+.artist-row:last-child { border-bottom: none; }
+.artist-row:hover { background: rgba(255,255,255,.02); }
+
+.artist-rank {
+  font-family: 'Syne Mono', monospace;
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--sp);
+  opacity: .4;
+  text-align: right;
+}
+
+.artist-img {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.artist-img-placeholder {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--border);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .7rem;
+  color: var(--muted);
+}
+
+.artist-info { min-width: 0; }
+
+.artist-name {
+  font-size: .85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.artist-genres {
+  font-family: 'Syne Mono', monospace;
+  font-size: .58rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.artist-pop {
+  font-family: 'Syne Mono', monospace;
+  font-size: .65rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ── Track list ── */
+.track-list { display: flex; flex-direction: column; gap: .4rem; }
+
+.track-row {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: .8rem;
+  padding: .6rem .4rem;
+  border-bottom: 1px solid var(--border);
+  transition: background .15s;
+}
+
+.track-row:last-child { border-bottom: none; }
+.track-row:hover { background: rgba(255,255,255,.02); }
+
+.track-rank {
+  font-family: 'Syne Mono', monospace;
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--sp);
+  opacity: .4;
+  text-align: right;
+}
+
+.track-img {
+  width: 36px; height: 36px;
+  object-fit: cover;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.track-info { min-width: 0; }
+
+.track-name {
+  font-size: .85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-artist {
+  font-family: 'Syne Mono', monospace;
+  font-size: .58rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-year {
+  font-family: 'Syne Mono', monospace;
+  font-size: .65rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ── Genre cloud ── */
+.genre-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  align-items: flex-start;
+}
+
+.genre-tag {
+  font-family: 'Syne Mono', monospace;
+  font-size: .65rem;
+  padding: .3rem .7rem;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  letter-spacing: .05em;
+  transition: all .2s;
+}
+
+.genre-tag.top { border-color: var(--sp); color: var(--sp); font-size: .75rem; padding: .4rem .9rem; }
+.genre-tag.mid { border-color: var(--gold); color: var(--gold); }
+
+/* ── Decade chart ── */
+.decade-chart { display: flex; flex-direction: column; gap: .8rem; }
+
+.decade-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 36px;
+  align-items: center;
+  gap: .8rem;
+}
+
+.decade-label {
+  font-family: 'Syne Mono', monospace;
+  font-size: .7rem;
+  color: var(--muted);
+  text-align: right;
+}
+
+.decade-bar-wrap {
+  background: var(--border);
+  height: 8px;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.decade-bar {
+  height: 100%;
+  background: var(--sp);
+  transition: width 1.2s cubic-bezier(.4,0,.2,1);
+}
+
+.decade-count {
+  font-family: 'Syne Mono', monospace;
+  font-size: .65rem;
+  color: var(--muted);
+}
+
+/* ── Mainstream meter ── */
+.mainstream-display {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.mainstream-number {
+  font-size: 5rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--sp);
+}
+
+.mainstream-label {
+  font-family: 'Syne Mono', monospace;
+  font-size: .65rem;
+  color: var(--muted);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  margin-top: .5rem;
+}
+
+.mainstream-desc {
+  font-family: 'Syne Mono', monospace;
+  font-size: .65rem;
+  color: var(--muted);
+  margin-top: .8rem;
+  line-height: 1.7;
+}
+
+/* ── Recent tracks ── */
+.recent-list { display: flex; flex-direction: column; gap: .4rem; }
+
+.recent-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: .5rem .4rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.recent-row:last-child { border-bottom: none; }
+
+.recent-name {
+  font-size: .8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recent-artist {
+  font-family: 'Syne Mono', monospace;
+  font-size: .58rem;
+  color: var(--muted);
+}
+
+.recent-time {
+  font-family: 'Syne Mono', monospace;
+  font-size: .6rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ── Attribution ── */
+.attribution {
+  font-family: 'Syne Mono', monospace;
+  font-size: .55rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.attribution a { color: var(--sp); text-decoration: none; }
+
+/* ── Error ── */
+.error-box {
+  background: rgba(201,64,64,.1);
+  border: 1px solid var(--red);
+  padding: 1rem 1.2rem;
+  font-family: 'Syne Mono', monospace;
+  font-size: .7rem;
+  color: var(--red);
+  margin-bottom: 1rem;
+}
+
+/* ── Animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up { animation: fadeUp .5s ease forwards; }
+.fade-up-2 { animation: fadeUp .5s .1s ease both; }
+.fade-up-3 { animation: fadeUp .5s .2s ease both; }
+.fade-up-4 { animation: fadeUp .5s .3s ease both; }
+
+@media (max-width: 720px) {
+  .profile-grid, .profile-grid.three { grid-template-columns: 1fr; }
+  .personality-card { grid-template-columns: 1fr; }
+  .personality-stats { flex-direction: row; flex-wrap: wrap; min-width: 0; }
+  .app-header { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Login ── -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">Muzikaal Profiel</div>
+    <div class="login-title">Wie ben jij<br>als luisteraar?</div>
+    <div class="login-sub">
+      Verbind je Spotify-account en ontdek je muzikale DNA —
+      topartiesten, genres, decennia en je persoonlijkheidstype als luisteraar.
+    </div>
+    <div class="field-label">Spotify Client ID</div>
+    <input class="field-input" id="cidInput" type="text" placeholder="32-karakter Client ID uit Spotify Dashboard" />
+    <button class="login-btn" onclick="doLogin()">Verbinden met Spotify</button>
+    <div class="redirect-hint">
+      <strong>Redirect URI — vul dit exact in bij Spotify Dashboard:</strong>
+      <span class="redirect-uri" id="redirectUriDisplay"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ── App ── -->
+<div id="app">
+  <div class="app-header">
+    <div class="header-left">
+      <div class="app-label">Muzikaal Profiel — Spotify</div>
+      <div class="user-name" id="userName">Laden…</div>
+      <div class="user-since" id="userSince"></div>
+    </div>
+    <div class="header-right">
+      <div class="period-tabs">
+        <button class="period-tab active" data-range="short_term" onclick="switchPeriod(this)">4 weken</button>
+        <button class="period-tab" data-range="medium_term" onclick="switchPeriod(this)">6 maanden</button>
+        <button class="period-tab" data-range="long_term" onclick="switchPeriod(this)">All time</button>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Uitloggen</button>
+    </div>
+  </div>
+
+  <div id="loadingState">
+    <div class="loader"></div>
+    <div class="loading-text">Jouw muziek wordt geanalyseerd…</div>
+  </div>
+
+  <div id="errorBox" class="error-box" style="display:none"></div>
+
+  <div id="profileContent">
+    <!-- Personality -->
+    <div class="personality-card fade-up" id="personalityCard">
+      <div>
+        <div class="personality-label">Jouw muzikale persoonlijkheid</div>
+        <div class="personality-type" id="personalityType">—</div>
+        <div class="personality-desc" id="personalityDesc">—</div>
+      </div>
+      <div class="personality-stats" id="personalityStats"></div>
+    </div>
+
+    <!-- Top row: artists + tracks -->
+    <div class="profile-grid fade-up-2">
+      <div class="section-card">
+        <div class="section-title">Top Artiesten</div>
+        <div class="artist-list" id="artistList"></div>
+      </div>
+      <div class="section-card">
+        <div class="section-title">Top Tracks</div>
+        <div class="track-list" id="trackList"></div>
+      </div>
+    </div>
+
+    <!-- Second row: genres + decades + mainstream -->
+    <div class="profile-grid three fade-up-3">
+      <div class="section-card">
+        <div class="section-title">Genres</div>
+        <div class="genre-cloud" id="genreCloud"></div>
+      </div>
+      <div class="section-card">
+        <div class="section-title">Decennia</div>
+        <div class="decade-chart" id="decadeChart"></div>
+      </div>
+      <div class="section-card">
+        <div class="section-title">Mainstream Score</div>
+        <div class="mainstream-display">
+          <div class="mainstream-number" id="mainstreamNumber">—</div>
+          <div class="mainstream-label" id="mainstreamLabel">—</div>
+          <div class="mainstream-desc" id="mainstreamDesc">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent played -->
+    <div class="profile-grid full fade-up-4">
+      <div class="section-card">
+        <div class="section-title">Recent Gespeeld</div>
+        <div class="recent-list" id="recentList"></div>
+      </div>
+    </div>
+
+    <div class="attribution">
+      Muziekdata door <a href="https://www.spotify.com" target="_blank" rel="noopener">Spotify</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// Spotify PKCE Client
+// Compliant: PKCE flow, token refresh, exponential backoff (Retry-After),
+// full error handling, minimum scopes, /me/top endpoints, attribution
+// ═══════════════════════════════════════════════════════════════════════════
+const SP = (() => {
+  const P = 'mp_';
+  const k = n => P + n;
+  const SCOPES = 'user-top-read user-read-recently-played user-read-private';
+  const REDIRECT = 'https://AllardDijkstra.github.io/muziekprofiel/';
+
+  async function rand32() {
+    const a = new Uint8Array(32); crypto.getRandomValues(a);
+    return btoa(String.fromCharCode(...a)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+  }
+  async function sha256b64(s) {
+    const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+    return btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+  }
+
+  async function login(cid) {
+    localStorage.setItem(k('cid'), cid);
+    const v = await rand32();
+    localStorage.setItem(k('v'), v);
+    const ch = await sha256b64(v);
+    const p = new URLSearchParams({ client_id:cid, response_type:'code',
+      redirect_uri: REDIRECT, scope: SCOPES,
+      code_challenge_method:'S256', code_challenge: ch });
+    window.location = 'https://accounts.spotify.com/authorize?' + p;
+  }
+
+  async function _save(r) {
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error_description || d.error || `HTTP ${r.status}`);
+    localStorage.setItem(k('token'),   d.access_token);
+    localStorage.setItem(k('exp'),     Date.now() + (d.expires_in - 60)*1000);
+    if (d.refresh_token) localStorage.setItem(k('refresh'), d.refresh_token);
+  }
+
+  async function _exchange(code) {
+    await _save(await fetch('https://accounts.spotify.com/api/token', {
+      method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body: new URLSearchParams({ grant_type:'authorization_code', code,
+        redirect_uri: REDIRECT, client_id: localStorage.getItem(k('cid')),
+        code_verifier: localStorage.getItem(k('v')) })
+    }));
+  }
+
+  async function _refresh() {
+    const rt = localStorage.getItem(k('refresh'));
+    if (!rt) throw new Error('Sessie verlopen — log opnieuw in.');
+    await _save(await fetch('https://accounts.spotify.com/api/token', {
+      method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body: new URLSearchParams({ grant_type:'refresh_token', refresh_token:rt,
+        client_id: localStorage.getItem(k('cid')) })
+    }));
+  }
+
+  async function token() {
+    const t = localStorage.getItem(k('token'));
+    const e = parseInt(localStorage.getItem(k('exp'))||'0');
+    if (t && Date.now() < e) return t;
+    await _refresh();
+    return localStorage.getItem(k('token'));
+  }
+
+  async function api(ep, opts={}, attempt=0) {
+    const tk = await token();
+    const r = await fetch('https://api.spotify.com/v1'+ep, {
+      ...opts, headers:{ 'Authorization':'Bearer '+tk,
+        'Content-Type':'application/json', ...(opts.headers||{}) }
+    });
+    if (r.status === 429) {
+      if (attempt >= 4) throw new Error('Rate limit — probeer het later.');
+      const wait = parseInt(r.headers.get('Retry-After')||'1') * 1000 * Math.pow(2,attempt);
+      await new Promise(res => setTimeout(res, wait));
+      return api(ep, opts, attempt+1);
+    }
+    if (r.status === 204) return {};
+    const d = await r.json();
+    if (!r.ok) {
+      const msg = d?.error?.message || `HTTP ${r.status}`;
+      if (r.status===401) throw new Error('Sessie verlopen — log opnieuw in.');
+      if (r.status===403) throw new Error('Toegang geweigerd: '+msg);
+      throw new Error(`Spotify fout ${r.status}: ${msg}`);
+    }
+    return d;
+  }
+
+  async function handleCallback() {
+    const p = new URLSearchParams(location.search);
+    if (p.get('error')) throw new Error('Login geweigerd: '+p.get('error'));
+    if (!p.get('code')) return false;
+    await _exchange(p.get('code'));
+    history.replaceState({}, '', location.pathname);
+    return true;
+  }
+
+  function logout() { ['token','exp','refresh','v'].forEach(n=>localStorage.removeItem(k(n))); }
+  const isConnected = () => !!localStorage.getItem(k('token'));
+  const clientId    = () => localStorage.getItem(k('cid'))||'';
+  const redirectUri = () => REDIRECT;
+
+  return { login, handleCallback, logout, isConnected, clientId, redirectUri, api };
+})();
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Data & Analysis
+// ═══════════════════════════════════════════════════════════════════════════
+let currentRange = 'short_term';
+let cache = {};
+
+async function loadProfile(range) {
+  showLoading(true);
+  hideError();
+  try {
+    const [me, topArtists, topTracks, recent] = await Promise.all([
+      SP.api('/me'),
+      SP.api(`/me/top/artists?limit=10&time_range=${range}`),
+      SP.api(`/me/top/tracks?limit=10&time_range=${range}`),
+      SP.api('/me/player/recently-played?limit=20')
+    ]);
+    cache[range] = { me, topArtists, topTracks, recent };
+    renderProfile(cache[range]);
+  } catch(e) {
+    showError(e.message);
+  }
+  showLoading(false);
+}
+
+function renderProfile({ me, topArtists, topTracks, recent }) {
+  // Header
+  document.getElementById('userName').textContent = me.display_name || me.id;
+  document.getElementById('userSince').textContent =
+    me.country ? `Spotify · ${me.country}` : 'Spotify';
+
+  // Gather all genres from top artists
+  const allGenres = topArtists.items.flatMap(a => a.genres || []);
+  const genreCount = {};
+  allGenres.forEach(g => { genreCount[g] = (genreCount[g]||0)+1; });
+  const sortedGenres = Object.entries(genreCount).sort((a,b)=>b[1]-a[1]);
+
+  // Decade distribution from top tracks
+  const decades = {};
+  topTracks.items.forEach(t => {
+    const year = parseInt((t.album?.release_date||'2000').substring(0,4));
+    const dec = Math.floor(year/10)*10;
+    decades[dec] = (decades[dec]||0)+1;
+  });
+
+  // Mainstream score (avg popularity of top artists)
+  const avgPop = topArtists.items.length
+    ? Math.round(topArtists.items.reduce((s,a)=>s+(a.popularity||0),0)/topArtists.items.length)
+    : 50;
+
+  // Personality
+  renderPersonality(sortedGenres, avgPop, decades);
+
+  // Artists
+  renderArtists(topArtists.items);
+
+  // Tracks
+  renderTracks(topTracks.items);
+
+  // Genres
+  renderGenres(sortedGenres);
+
+  // Decades
+  renderDecades(decades);
+
+  // Mainstream
+  renderMainstream(avgPop);
+
+  // Recent
+  renderRecent(recent.items || []);
+
+  document.getElementById('profileContent').style.display = 'block';
+}
+
+function renderPersonality(genres, avgPop, decades) {
+  const topGenres = genres.slice(0,3).map(g=>g[0]);
+  const genreStr  = topGenres.join(', ');
+
+  // Determine dominant decade
+  const decEntries = Object.entries(decades).sort((a,b)=>b[1]-a[1]);
+  const domDec = decEntries[0]?.[0] || 2010;
+
+  // Build personality type
+  let type, desc;
+  const isHeavy   = topGenres.some(g => /metal|rock|punk|hardcore|grunge/.test(g));
+  const isElec    = topGenres.some(g => /electro|techno|house|dance|edm|synth/.test(g));
+  const isJazz    = topGenres.some(g => /jazz|blues|soul|funk|r&b/.test(g));
+  const isClassic = topGenres.some(g => /classical|orchestral|opera|ambient/.test(g));
+  const isHipHop  = topGenres.some(g => /hip.hop|rap|trap|grime/.test(g));
+  const isIndie   = topGenres.some(g => /indie|alternative|lo.fi/.test(g));
+  const isOld     = parseInt(domDec) < 1990;
+  const isNiche   = avgPop < 35;
+  const isMainstream = avgPop > 70;
+
+  if (isHeavy && isNiche) {
+    type = 'De Underground Predator';
+    desc = `Jij graaft dieper dan de meeste. ${genreStr} — nummers die de meeste mensen nooit zullen kennen. Je luistert niet naar wat populair is, je luistert naar wat goed is.`;
+  } else if (isHeavy) {
+    type = 'De Riff Archeoloog';
+    desc = `Zware gitaren, stevige ritmes. Jouw wereld draait om energie en riff. ${genreStr} vormen de backbone van je luisterprofiel — geen compromissen.`;
+  } else if (isElec && isNiche) {
+    type = 'De Frequentie Onderzoeker';
+    desc = `Jij zoekt geluid op plekken waar anderen niet durven. ${genreStr} — elektronische muziek als experiment, niet als achtergrond.`;
+  } else if (isElec) {
+    type = 'De Ritme Architect';
+    desc = `Beats, texturen, beweging. ${genreStr} domineren jouw profiel. Muziek als constructie — elk element op zijn plek.`;
+  } else if (isJazz) {
+    type = 'De Harmonische Denker';
+    desc = `${genreStr} — muziek die ademhaalt. Jij waardeert improvisatie, gevoel en de ruimte tussen de noten. Complexiteit als vanzelfsprekendheid.`;
+  } else if (isClassic) {
+    type = 'De Structuralist';
+    desc = `${genreStr} — muziek als architectuur. Jij hoort de constructie, de opbouw, de intentie achter elk akkoord.`;
+  } else if (isHipHop && isNiche) {
+    type = 'De Lyrische Graver';
+    desc = `${genreStr} — maar dan de kant die de mainstream nooit bereikt. Tekst boven productie, underground boven mainstream.`;
+  } else if (isHipHop) {
+    type = 'De Beat Discipel';
+    desc = `${genreStr} — ritme en tekst als gelijkwaardige talen. Jij volgt de evolutie van het genre nauwgezet.`;
+  } else if (isIndie && isOld) {
+    type = 'De Nostalgische Ontdekker';
+    desc = `${genreStr} met een voorkeur voor de ${domDec}s. Jij combineert klassiekers met nieuwe indie-geluiden — verleden en heden in balans.`;
+  } else if (isIndie) {
+    type = 'De Indie Cartograaf';
+    desc = `${genreStr} — jij kent de platen die critici noemen maar weinigen draaien. Selectief, bewust, authentiek.`;
+  } else if (isMainstream) {
+    type = 'De Culturele Barometer';
+    desc = `Jij staat midden in de culturele tijdgeest. ${genreStr} — populair, maar dat is geen schande; het betekent dat je aanvoelt wat de wereld beweegt.`;
+  } else {
+    type = 'De Eclectische Luisteraar';
+    desc = `${genreStr} — jij laat je niet in een hokje stoppen. Breed, nieuwsgierig, altijd op zoek naar het volgende interessante geluid.`;
+  }
+
+  document.getElementById('personalityType').textContent = type;
+  document.getElementById('personalityDesc').textContent = desc;
+
+  // Stats bars
+  const underground = Math.max(0, 100 - avgPop);
+  const nostalgie   = Math.min(100, Math.max(0, (2010 - parseInt(domDec)) * 3));
+  const diversiteit = Math.min(100, Object.keys(genreCount_).length * 5);
+
+  document.getElementById('personalityStats').innerHTML = [
+    { label: 'Underground', val: underground },
+    { label: 'Nostalgie',   val: nostalgie },
+    { label: 'Diversiteit', val: Math.min(100, Object.keys(genreCount_global).length * 4) }
+  ].map(s => `
+    <div class="pstat">
+      <div class="pstat-label">${s.label}</div>
+      <div class="pstat-bar-wrap"><div class="pstat-bar" style="width:${s.val}%"></div></div>
+      <div class="pstat-val">${s.val}%</div>
+    </div>`).join('');
+}
+
+// Track genre count globally for personality stats
+let genreCount_global = {};
+let genreCount_ = {};
+
+function renderArtists(artists) {
+  genreCount_global = {};
+  artists.forEach(a => (a.genres||[]).forEach(g => { genreCount_global[g]=(genreCount_global[g]||0)+1; }));
+  genreCount_ = genreCount_global;
+
+  document.getElementById('artistList').innerHTML = artists.map((a, i) => `
+    <div class="artist-row">
+      <div class="artist-rank">${i+1}</div>
+      ${a.images?.[2]?.url
+        ? `<img class="artist-img" src="${a.images[2].url}" alt="${escHtml(a.name)}" loading="lazy">`
+        : `<div class="artist-img-placeholder">♪</div>`}
+      <div class="artist-info">
+        <div class="artist-name">${escHtml(a.name)}</div>
+        <div class="artist-genres">${(a.genres||[]).slice(0,2).join(', ')||'—'}</div>
+      </div>
+      <div class="artist-pop">${a.popularity||0}</div>
+    </div>`).join('');
+}
+
+function renderTracks(tracks) {
+  document.getElementById('trackList').innerHTML = tracks.map((t, i) => {
+    const year = (t.album?.release_date||'').substring(0,4)||'—';
+    const img  = t.album?.images?.[2]?.url || t.album?.images?.[0]?.url;
+    return `
+    <div class="track-row">
+      <div class="track-rank">${i+1}</div>
+      ${img ? `<img class="track-img" src="${img}" alt="" loading="lazy">` : '<div class="track-img" style="background:var(--border)"></div>'}
+      <div class="track-info">
+        <div class="track-name">${escHtml(t.name)}</div>
+        <div class="track-artist">${escHtml(t.artists?.map(a=>a.name).join(', ')||'')}</div>
+      </div>
+      <div class="track-year">${year}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderGenres(sorted) {
+  const top = sorted.slice(0,3).map(g=>g[0]);
+  const mid = sorted.slice(3,8).map(g=>g[0]);
+  const rest = sorted.slice(8,16).map(g=>g[0]);
+  document.getElementById('genreCloud').innerHTML =
+    top.map(g=>`<span class="genre-tag top">${escHtml(g)}</span>`).join('')+
+    mid.map(g=>`<span class="genre-tag mid">${escHtml(g)}</span>`).join('')+
+    rest.map(g=>`<span class="genre-tag">${escHtml(g)}</span>`).join('');
+}
+
+function renderDecades(decades) {
+  const sorted = Object.entries(decades).sort((a,b)=>parseInt(a[0])-parseInt(b[0]));
+  const max = Math.max(...sorted.map(d=>d[1]), 1);
+  document.getElementById('decadeChart').innerHTML = sorted.map(([dec, count]) => `
+    <div class="decade-row">
+      <div class="decade-label">${dec}s</div>
+      <div class="decade-bar-wrap">
+        <div class="decade-bar" style="width:${Math.round(count/max*100)}%"></div>
+      </div>
+      <div class="decade-count">${count}</div>
+    </div>`).join('');
+}
+
+function renderMainstream(score) {
+  let label, desc;
+  if      (score >= 80) { label='Volledig Mainstream';   desc='Jij luistert mee met de rest van de wereld. Populaire muziek is populair om een reden.'; }
+  else if (score >= 60) { label='Lichtelijk Mainstream'; desc='Je volgt de mainstream, maar met enige selectiviteit. Niet elke hit trekt jou.'; }
+  else if (score >= 40) { label='Gebalanceerd';          desc='Noch mainstream, noch underground. Jij maakt eigen keuzes, onafhankelijk van hype.'; }
+  else if (score >= 20) { label='Underground Gericht';   desc='Jij zoekt buiten de spotlights. Ontdekking gaat voor erkenning.'; }
+  else                  { label='Diep Underground';      desc='Vrijwel niemand in je omgeving kent de artiesten die jij draait. Echt.'; }
+
+  document.getElementById('mainstreamNumber').textContent = score;
+  document.getElementById('mainstreamLabel').textContent  = label;
+  document.getElementById('mainstreamDesc').textContent   = desc;
+}
+
+function renderRecent(items) {
+  if (!items.length) {
+    document.getElementById('recentList').innerHTML = '<div style="font-family:\'Syne Mono\',monospace;font-size:.7rem;color:var(--muted)">Geen recente tracks beschikbaar.</div>';
+    return;
+  }
+  document.getElementById('recentList').innerHTML = items.slice(0,10).map(item => {
+    const t    = item.track;
+    const time = item.played_at ? timeAgo(new Date(item.played_at)) : '';
+    return `
+    <div class="recent-row">
+      <div>
+        <div class="recent-name">${escHtml(t.name)}</div>
+        <div class="recent-artist">${escHtml(t.artists?.map(a=>a.name).join(', ')||'')}</div>
+      </div>
+      <div class="recent-time">${time}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// UI helpers
+// ═══════════════════════════════════════════════════════════════════════════
+function showLoading(v) {
+  document.getElementById('loadingState').style.display    = v ? 'block' : 'none';
+  document.getElementById('profileContent').style.display  = v ? 'none'  : '';
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorBox');
+  el.textContent = '✗ ' + msg;
+  el.style.display = 'block';
+}
+
+function hideError() {
+  document.getElementById('errorBox').style.display = 'none';
+}
+
+function switchPeriod(btn) {
+  document.querySelectorAll('.period-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentRange = btn.dataset.range;
+  if (cache[currentRange]) {
+    renderProfile(cache[currentRange]);
+  } else {
+    loadProfile(currentRange);
+  }
+}
+
+function doLogin() {
+  const cid = document.getElementById('cidInput').value.trim();
+  if (!cid) { alert('Vul je Spotify Client ID in.'); return; }
+  SP.login(cid).catch(e => alert(e.message));
+}
+
+function doLogout() {
+  SP.logout();
+  cache = {};
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function timeAgo(date) {
+  const diff = (Date.now() - date) / 1000;
+  if (diff < 60)   return 'zojuist';
+  if (diff < 3600) return Math.floor(diff/60) + ' min geleden';
+  if (diff < 86400)return Math.floor(diff/3600) + ' uur geleden';
+  return Math.floor(diff/86400) + ' dagen geleden';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Init
+// ═══════════════════════════════════════════════════════════════════════════
+document.getElementById('redirectUriDisplay').textContent = SP.redirectUri();
+
+(async () => {
+  // Pre-fill Client ID if stored
+  const cid = SP.clientId();
+  if (cid) document.getElementById('cidInput').value = cid;
+
+  // Handle OAuth callback
+  try { await SP.handleCallback(); } catch(e) { alert(e.message); }
+
+  if (SP.isConnected()) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    await loadProfile(currentRange);
+  }
+})();
+</script>
+</body>
+</html>
