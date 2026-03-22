@@ -6,470 +6,120 @@
 <title>QOTSA — Concert Generator</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
-
-:root {
-  --bg: #0e0c0a;
-  --paper: #f5f0e8;
-  --ink: #1a1410;
-  --red: #b5282a;
-  --red-dark: #8a1e20;
-  --gold: #c8963a;
-  --rust: #8b3a1a;
-  --dim: #2a2420;
-  --muted: #6a5a50;
-  --sp: #1db954;
-  --sp-dark: #158a3e;
+:root{
+  --bg:#0e0c0a;--paper:#f5f0e8;--ink:#1a1410;
+  --red:#b5282a;--red-dark:#8a1e20;--gold:#c8963a;
+  --dim:#2a2420;--muted:#6a5a50;--border:#3a3028;
+  --sp:#1db954;--sp-dark:#158a3e;
 }
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);min-height:100vh;font-family:'Courier Prime',monospace;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.008) 2px,rgba(255,255,255,.008) 3px);pointer-events:none;z-index:0;}
 
-* { margin:0; padding:0; box-sizing:border-box; }
+/* Spotify bar */
+.sp-bar{position:relative;z-index:2;background:var(--dim);border-bottom:1px solid var(--border);padding:.7rem 2rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+.sp-bar-label{font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;}
+.sp-input{background:var(--bg);border:1px solid var(--border);color:var(--paper);font-family:'Courier Prime',monospace;font-size:.75rem;padding:.4rem .8rem;flex:1;min-width:180px;outline:none;}
+.sp-input:focus{border-color:var(--sp);}
+.sp-connect-btn{background:var(--sp);border:none;color:#000;font-family:'Oswald',sans-serif;font-size:.75rem;font-weight:600;letter-spacing:.15em;padding:.4rem 1.2rem;cursor:pointer;text-transform:uppercase;transition:background .2s;white-space:nowrap;}
+.sp-connect-btn:hover{background:var(--sp-dark);}
+.sp-connected-text{font-size:.7rem;color:var(--sp);letter-spacing:.1em;}
+.sp-logout-btn{background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'Courier Prime',monospace;font-size:.65rem;padding:.3rem .7rem;cursor:pointer;transition:all .2s;}
+.sp-logout-btn:hover{border-color:var(--red);color:var(--red);}
+.sp-hint{width:100%;font-size:.58rem;color:#444;letter-spacing:.06em;}
+.sp-hint code{color:var(--gold);}
 
-body {
-  background: var(--bg);
-  min-height: 100vh;
-  font-family: 'Courier Prime', monospace;
-  overflow-x: hidden;
-}
+/* Main */
+main{position:relative;z-index:1;max-width:920px;margin:0 auto;padding:3rem 1.5rem 5rem;}
 
-/* ── Background texture ── */
-body::before {
-  content:'';
-  position:fixed;
-  inset:0;
-  background:
-    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,.01) 2px, rgba(255,255,255,.01) 3px),
-    repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(255,255,255,.005) 60px, rgba(255,255,255,.005) 61px);
-  pointer-events:none;
-  z-index:0;
-}
+/* Poster header */
+.poster-header{text-align:center;margin-bottom:3rem;position:relative;}
+.poster-header::before{content:'';display:block;height:4px;background:var(--red);margin-bottom:1.5rem;}
+.poster-header::after{content:'';display:block;height:2px;background:var(--gold);margin-top:1.5rem;}
+.poster-presents{font-family:'Oswald',sans-serif;font-size:.75rem;letter-spacing:.5em;color:var(--gold);text-transform:uppercase;margin-bottom:.5rem;}
+.poster-band{font-family:'Oswald',sans-serif;font-size:clamp(3.5rem,10vw,7rem);font-weight:700;color:var(--paper);line-height:.85;letter-spacing:-.02em;text-transform:uppercase;}
+.poster-band span{color:var(--red);}
+.poster-sub{font-family:'Oswald',sans-serif;font-size:1rem;letter-spacing:.4em;color:var(--muted);text-transform:uppercase;margin-top:.8rem;}
 
-/* ── Spotify panel ── */
-.sp-bar {
-  position: relative;
-  z-index: 2;
-  background: var(--dim);
-  border-bottom: 1px solid #333;
-  padding: .7rem 2rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
+/* Controls */
+.controls{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin-bottom:.75rem;align-items:center;}
+.ctrl-label{font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;}
+.vibe-btn{background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'Oswald',sans-serif;font-size:.75rem;letter-spacing:.15em;padding:.45rem 1.1rem;cursor:pointer;text-transform:uppercase;transition:all .2s;}
+.vibe-btn:hover{border-color:var(--red);color:var(--paper);}
+.vibe-btn.active{background:var(--red);border-color:var(--red);color:var(--paper);}
+.gen-btn{background:var(--red);border:none;color:var(--paper);font-family:'Oswald',sans-serif;font-size:1rem;font-weight:600;letter-spacing:.2em;padding:.65rem 2.5rem;cursor:pointer;text-transform:uppercase;transition:background .2s;}
+.gen-btn:hover{background:var(--red-dark);}
 
-.sp-bar-label {
-  font-family: 'Oswald', sans-serif;
-  font-size: .7rem;
-  letter-spacing: .2em;
-  color: var(--muted);
-  text-transform: uppercase;
-}
+.variant-counter{text-align:center;font-family:'Courier Prime',monospace;font-size:.62rem;color:var(--muted);margin-bottom:2.5rem;letter-spacing:.1em;}
+.variant-counter span{color:var(--gold);}
 
-.sp-input {
-  background: var(--bg);
-  border: 1px solid #444;
-  color: var(--paper);
-  font-family: 'Courier Prime', monospace;
-  font-size: .75rem;
-  padding: .4rem .8rem;
-  flex: 1;
-  min-width: 180px;
-  outline: none;
-}
+/* Setlist */
+.setlist-wrap{display:none;animation:fadeUp .5s ease forwards;}
+.setlist-wrap.visible{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 
-.sp-input:focus { border-color: var(--sp); }
+.ticket{background:var(--paper);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.7);}
 
-.sp-connect-btn {
-  background: var(--sp);
-  border: none;
-  color: #000;
-  font-family: 'Oswald', sans-serif;
-  font-size: .75rem;
-  font-weight: 600;
-  letter-spacing: .15em;
-  padding: .4rem 1.2rem;
-  cursor: pointer;
-  text-transform: uppercase;
-  transition: background .2s;
-  white-space: nowrap;
-}
-.sp-connect-btn:hover { background: var(--sp-dark); }
+.ticket-header{background:var(--ink);color:var(--paper);padding:2rem 3rem 1.5rem;display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:start;border-bottom:4px solid var(--red);}
+.ticket-band{font-family:'Oswald',sans-serif;font-size:clamp(1.5rem,4vw,2.5rem);font-weight:700;letter-spacing:-.01em;line-height:1;color:var(--paper);}
+.ticket-concert-name{font-family:'Oswald',sans-serif;font-size:clamp(.9rem,2vw,1.3rem);font-weight:300;color:var(--red);letter-spacing:.1em;text-transform:uppercase;margin-top:.3rem;}
+.ticket-meta{text-align:right;font-size:.62rem;letter-spacing:.1em;color:var(--muted);line-height:2;text-transform:uppercase;}
+.ticket-meta strong{color:var(--paper);display:block;font-size:.78rem;}
 
-.sp-connected-text { font-size: .7rem; color: var(--sp); letter-spacing: .1em; }
-.sp-logout-btn {
-  background: transparent;
-  border: 1px solid #444;
-  color: var(--muted);
-  font-family: 'Courier Prime', monospace;
-  font-size: .65rem;
-  padding: .3rem .7rem;
-  cursor: pointer;
-  transition: all .2s;
-}
-.sp-logout-btn:hover { border-color: var(--red); color: var(--red); }
+.tear-line{border-top:2px dashed #ccc;margin:0 1.5rem;position:relative;}
+.tear-line::before,.tear-line::after{content:'';position:absolute;top:-10px;width:20px;height:20px;background:var(--bg);border-radius:50%;}
+.tear-line::before{left:-2rem;}.tear-line::after{right:-2rem;}
 
-.sp-hint {
-  width: 100%;
-  font-size: .58rem;
-  color: #444;
-  letter-spacing: .06em;
-}
-.sp-hint code { color: var(--gold); }
+.setlist-body{padding:2rem 3rem;}
+.setlist-section{margin-bottom:1.8rem;}
+.setlist-section-title{font-family:'Oswald',sans-serif;font-size:.68rem;letter-spacing:.4em;color:var(--muted);text-transform:uppercase;margin-bottom:.7rem;display:flex;align-items:center;gap:1rem;}
+.setlist-section-title::after{content:'';flex:1;height:1px;background:#ddd;}
 
-/* ── Main layout ── */
-main {
-  position: relative;
-  z-index: 1;
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 3rem 1.5rem 5rem;
-}
+.setlist-track{display:grid;grid-template-columns:32px 1fr auto;align-items:baseline;gap:.8rem;padding:.5rem 0;border-bottom:1px solid #e5dfd5;}
+.setlist-track:last-child{border-bottom:none;}
+.setlist-track:hover{background:rgba(0,0,0,.03);margin:0 -.5rem;padding:.5rem .5rem;}
 
-/* ── Concert poster header ── */
-.poster-header {
-  text-align: center;
-  margin-bottom: 3rem;
-  position: relative;
-}
+.track-num{font-family:'Oswald',sans-serif;font-size:1rem;font-weight:700;color:var(--red);opacity:.45;text-align:right;line-height:1;}
+.track-name{font-family:'Oswald',sans-serif;font-size:1rem;font-weight:500;color:var(--ink);line-height:1;}
+.track-album{font-size:.58rem;color:var(--muted);letter-spacing:.05em;margin-top:.15rem;}
+.track-duration{font-size:.68rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;}
 
-.poster-header::before {
-  content: '';
-  display: block;
-  height: 4px;
-  background: var(--red);
-  margin-bottom: 1.5rem;
-}
+.encore-marker{text-align:center;padding:.8rem 0;font-family:'Oswald',sans-serif;font-size:.62rem;letter-spacing:.5em;color:var(--red);text-transform:uppercase;}
 
-.poster-header::after {
-  content: '';
-  display: block;
-  height: 2px;
-  background: var(--gold);
-  margin-top: 1.5rem;
-}
+.ticket-footer{background:var(--ink);padding:1.5rem 3rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;border-top:4px solid var(--gold);}
+.footer-stat{font-family:'Oswald',sans-serif;}
+.footer-stat-label{font-size:.58rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;}
+.footer-stat-val{font-size:1.1rem;font-weight:600;color:var(--paper);}
 
-.poster-presents {
-  font-family: 'Oswald', sans-serif;
-  font-size: .75rem;
-  letter-spacing: .5em;
-  color: var(--gold);
-  text-transform: uppercase;
-  margin-bottom: .5rem;
-}
+.sp-add-btn{display:none;align-items:center;gap:.5rem;background:var(--sp);border:none;color:#000;font-family:'Oswald',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.15em;padding:.6rem 1.5rem;cursor:pointer;text-transform:uppercase;transition:background .2s;}
+.sp-add-btn.show{display:flex;}
+.sp-add-btn:hover{background:var(--sp-dark);}
+.sp-add-btn:disabled{opacity:.5;cursor:not-allowed;}
+.sp-feedback{font-size:.63rem;padding:.5rem .8rem;border:1px solid transparent;display:none;margin-top:.5rem;}
+.sp-feedback.show{display:block;}
+.sp-feedback.ok{border-color:var(--sp);color:var(--sp);background:rgba(29,185,84,.06);}
+.sp-feedback.err{border-color:var(--red);color:var(--red);background:rgba(181,40,42,.06);}
+.sp-feedback a{color:inherit;}
+.shuffle-note{font-size:.58rem;color:var(--border);text-align:right;margin-top:1.5rem;letter-spacing:.1em;text-transform:uppercase;}
 
-.poster-band {
-  font-family: 'Oswald', sans-serif;
-  font-size: clamp(3.5rem, 10vw, 7rem);
-  font-weight: 700;
-  color: var(--paper);
-  line-height: .85;
-  letter-spacing: -.02em;
-  text-transform: uppercase;
-}
-
-.poster-band span { color: var(--red); }
-
-.poster-sub {
-  font-family: 'Oswald', sans-serif;
-  font-size: 1rem;
-  letter-spacing: .4em;
-  color: var(--muted);
-  text-transform: uppercase;
-  margin-top: .8rem;
-}
-
-/* ── Controls ── */
-.controls {
-  display: flex;
-  gap: .75rem;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-bottom: 3rem;
-  align-items: center;
-}
-
-.ctrl-label {
-  font-family: 'Oswald', sans-serif;
-  font-size: .7rem;
-  letter-spacing: .2em;
-  color: var(--muted);
-  text-transform: uppercase;
-}
-
-.vibe-btn {
-  background: transparent;
-  border: 1px solid var(--dim);
-  color: var(--muted);
-  font-family: 'Oswald', sans-serif;
-  font-size: .75rem;
-  letter-spacing: .15em;
-  padding: .45rem 1.1rem;
-  cursor: pointer;
-  text-transform: uppercase;
-  transition: all .2s;
-}
-.vibe-btn:hover { border-color: var(--red); color: var(--paper); }
-.vibe-btn.active { background: var(--red); border-color: var(--red); color: var(--paper); }
-
-.gen-btn {
-  background: var(--red);
-  border: none;
-  color: var(--paper);
-  font-family: 'Oswald', sans-serif;
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: .2em;
-  padding: .65rem 2.5rem;
-  cursor: pointer;
-  text-transform: uppercase;
-  transition: background .2s;
-}
-.gen-btn:hover { background: var(--red-dark); }
-
-/* ── Concert ticket / setlist ── */
-.setlist-wrap {
-  display: none;
-  animation: fadeUp .5s ease forwards;
-}
-.setlist-wrap.visible { display: block; }
-
-@keyframes fadeUp {
-  from { opacity:0; transform:translateY(20px); }
-  to   { opacity:1; transform:translateY(0); }
-}
-
-/* Ticket stub top */
-.ticket {
-  background: var(--paper);
-  color: var(--ink);
-  position: relative;
-  box-shadow: 0 20px 60px rgba(0,0,0,.6);
-}
-
-.ticket-header {
-  background: var(--ink);
-  color: var(--paper);
-  padding: 2rem 3rem 1.5rem;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 2rem;
-  align-items: start;
-  border-bottom: 4px solid var(--red);
-}
-
-.ticket-band {
-  font-family: 'Oswald', sans-serif;
-  font-size: clamp(1.5rem, 4vw, 2.5rem);
-  font-weight: 700;
-  letter-spacing: -.01em;
-  line-height: 1;
-  color: var(--paper);
-}
-
-.ticket-concert-name {
-  font-family: 'Oswald', sans-serif;
-  font-size: clamp(1rem, 2.5vw, 1.4rem);
-  font-weight: 300;
-  color: var(--red);
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  margin-top: .3rem;
-}
-
-.ticket-meta {
-  text-align: right;
-  font-size: .65rem;
-  letter-spacing: .1em;
-  color: var(--muted);
-  line-height: 2;
-  text-transform: uppercase;
-}
-
-.ticket-meta strong { color: var(--paper); display: block; font-size: .8rem; }
-
-/* Tear line */
-.tear-line {
-  border-top: 2px dashed #ccc;
-  margin: 0 1.5rem;
-  position: relative;
-}
-.tear-line::before, .tear-line::after {
-  content: '';
-  position: absolute;
-  top: -10px;
-  width: 20px; height: 20px;
-  background: var(--bg);
-  border-radius: 50%;
-}
-.tear-line::before { left: -2rem; }
-.tear-line::after  { right: -2rem; }
-
-/* Setlist body */
-.setlist-body {
-  padding: 2rem 3rem;
-}
-
-.setlist-section-title {
-  font-family: 'Oswald', sans-serif;
-  font-size: .7rem;
-  letter-spacing: .4em;
-  color: var(--muted);
-  text-transform: uppercase;
-  margin-bottom: .8rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-.setlist-section-title::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: #ddd;
-}
-
-.setlist-section { margin-bottom: 2rem; }
-
-.setlist-track {
-  display: grid;
-  grid-template-columns: 32px 1fr auto;
-  align-items: baseline;
-  gap: .8rem;
-  padding: .55rem 0;
-  border-bottom: 1px solid #e8e2d8;
-  transition: background .1s;
-}
-.setlist-track:last-child { border-bottom: none; }
-.setlist-track:hover { background: rgba(0,0,0,.03); margin: 0 -.5rem; padding: .55rem .5rem; }
-
-.track-num {
-  font-family: 'Oswald', sans-serif;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--red);
-  opacity: .5;
-  text-align: right;
-  line-height: 1;
-}
-
-.track-name {
-  font-family: 'Oswald', sans-serif;
-  font-size: 1.05rem;
-  font-weight: 500;
-  color: var(--ink);
-  line-height: 1;
-}
-
-.track-album {
-  font-size: .6rem;
-  color: var(--muted);
-  letter-spacing: .05em;
-  margin-top: .15rem;
-}
-
-.track-duration {
-  font-size: .7rem;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-/* Encore star */
-.encore-marker {
-  text-align: center;
-  padding: .8rem 0;
-  font-family: 'Oswald', sans-serif;
-  font-size: .65rem;
-  letter-spacing: .5em;
-  color: var(--red);
-  text-transform: uppercase;
-}
-
-/* Ticket footer */
-.ticket-footer {
-  background: var(--ink);
-  padding: 1.5rem 3rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-  border-top: 4px solid var(--gold);
-}
-
-.footer-total {
-  font-family: 'Oswald', sans-serif;
-}
-
-.footer-total-label {
-  font-size: .6rem;
-  letter-spacing: .2em;
-  color: var(--muted);
-  text-transform: uppercase;
-}
-
-.footer-total-val {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--paper);
-}
-
-.sp-add-btn {
-  display: none;
-  align-items: center;
-  gap: .5rem;
-  background: var(--sp);
-  border: none;
-  color: #000;
-  font-family: 'Oswald', sans-serif;
-  font-size: .8rem;
-  font-weight: 600;
-  letter-spacing: .15em;
-  padding: .6rem 1.5rem;
-  cursor: pointer;
-  text-transform: uppercase;
-  transition: background .2s;
-}
-.sp-add-btn.show { display: flex; }
-.sp-add-btn:hover { background: var(--sp-dark); }
-.sp-add-btn:disabled { opacity: .5; cursor: not-allowed; }
-
-.sp-feedback {
-  font-size: .65rem;
-  padding: .5rem .8rem;
-  border: 1px solid transparent;
-  display: none;
-  margin-top: .5rem;
-}
-.sp-feedback.show { display: block; }
-.sp-feedback.ok  { border-color: var(--sp); color: var(--sp); background: rgba(29,185,84,.08); }
-.sp-feedback.err { border-color: var(--red); color: var(--red); background: rgba(181,40,42,.08); }
-.sp-feedback a   { color: inherit; }
-
-.shuffle-note {
-  font-size: .58rem;
-  color: var(--dim);
-  text-align: right;
-  margin-top: 1.5rem;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-}
-
-@media (max-width: 600px) {
-  .ticket-header, .setlist-body, .ticket-footer { padding-left: 1.5rem; padding-right: 1.5rem; }
-  .ticket-header { grid-template-columns: 1fr; }
-  .ticket-meta { text-align: left; }
-  .tear-line::before, .tear-line::after { display: none; }
+@media(max-width:600px){
+  .ticket-header,.setlist-body,.ticket-footer{padding-left:1.2rem;padding-right:1.2rem;}
+  .ticket-header{grid-template-columns:1fr;}
+  .ticket-meta{text-align:left;}
+  .tear-line::before,.tear-line::after{display:none;}
+  main{padding:2rem 1rem 4rem;}
 }
 </style>
 </head>
 <body>
 
-<!-- Spotify bar -->
-<div class="sp-bar" id="spBar">
+<div class="sp-bar">
   <span class="sp-bar-label">Spotify</span>
   <div id="spLoginArea" style="display:flex;gap:.75rem;align-items:center;flex:1;flex-wrap:wrap;">
-    <input class="sp-input" id="cidInput" placeholder="Plak je Spotify Client ID hier…" />
+    <input class="sp-input" id="cidInput" placeholder="Plak je Spotify Client ID hier…"/>
     <button class="sp-connect-btn" onclick="doLogin()">Verbinden</button>
   </div>
-  <div id="spConnectedArea" style="display:none;display:flex;gap:1rem;align-items:center;">
+  <div id="spConnectedArea" style="display:none;gap:1rem;align-items:center;">
     <span class="sp-connected-text">✓ Verbonden</span>
     <button class="sp-logout-btn" onclick="doLogout()">Uitloggen</button>
   </div>
@@ -477,271 +127,349 @@ main {
 </div>
 
 <main>
-  <!-- Poster header -->
   <div class="poster-header">
     <div class="poster-presents">One Night Only</div>
     <div class="poster-band">Queens<br><span>of the</span><br>Stone Age</div>
-    <div class="poster-sub">Concert Setlist Generator</div>
+    <div class="poster-sub">Concert Setlist Generator · ~2 uur</div>
   </div>
 
-  <!-- Controls -->
   <div class="controls">
     <span class="ctrl-label">Type:</span>
-    <button class="vibe-btn active" data-vibe="classic">Classic Set</button>
+    <button class="vibe-btn active" data-vibe="classic">Classic</button>
     <button class="vibe-btn" data-vibe="deep">Deep Cuts</button>
     <button class="vibe-btn" data-vibe="heavy">Maximum Heavy</button>
     <button class="vibe-btn" data-vibe="hits">Greatest Hits</button>
     <button class="gen-btn" onclick="generateSetlist()">▶ Genereer Setlist</button>
   </div>
+  <div class="variant-counter" id="variantCounter">&nbsp;</div>
 
   <div class="setlist-wrap" id="setlistWrap"></div>
 </main>
 
 <script>
-// ── Spotify PKCE ─────────────────────────────────────────────────────────
-const SP = (() => {
-  const P = 'qc_';
-  const k = n => P+n;
-  const SCOPES = 'playlist-modify-public playlist-modify-private';
-
-  async function rand32() {
-    const a=new Uint8Array(32);crypto.getRandomValues(a);
-    return btoa(String.fromCharCode(...a)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
-  }
-  async function sha256(s) {
-    const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
-    return btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
-  }
-  function redirectUri() { return window.location.origin+window.location.pathname; }
-
-  async function login(cid) {
-    localStorage.setItem(k('cid'),cid);
-    const v=await rand32(); localStorage.setItem(k('v'),v);
-    const ch=await sha256(v);
-    const p=new URLSearchParams({client_id:cid,response_type:'code',redirect_uri:redirectUri(),
-      scope:SCOPES,code_challenge_method:'S256',code_challenge:ch});
-    window.location='https://accounts.spotify.com/authorize?'+p;
-  }
-  async function _save(r) {
-    const d=await r.json();
-    if(!r.ok) throw new Error(d.error_description||d.error||`HTTP ${r.status}`);
-    localStorage.setItem(k('token'),d.access_token);
-    localStorage.setItem(k('exp'),Date.now()+(d.expires_in-60)*1000);
-    if(d.refresh_token) localStorage.setItem(k('refresh'),d.refresh_token);
-  }
-  async function _exchange(code) {
-    await _save(await fetch('https://accounts.spotify.com/api/token',{
-      method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
-      body:new URLSearchParams({grant_type:'authorization_code',code,redirect_uri:redirectUri(),
-        client_id:localStorage.getItem(k('cid')),code_verifier:localStorage.getItem(k('v'))})
-    }));
-  }
-  async function _refresh() {
-    const rt=localStorage.getItem(k('refresh'));
-    if(!rt) throw new Error('Sessie verlopen — log opnieuw in.');
-    await _save(await fetch('https://accounts.spotify.com/api/token',{
-      method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
-      body:new URLSearchParams({grant_type:'refresh_token',refresh_token:rt,client_id:localStorage.getItem(k('cid'))})
-    }));
-  }
-  async function token() {
-    const t=localStorage.getItem(k('token')),e=parseInt(localStorage.getItem(k('exp'))||'0');
-    if(t&&Date.now()<e) return t;
-    await _refresh(); return localStorage.getItem(k('token'));
-  }
-  async function api(ep,opts={},attempt=0) {
-    const tk=await token();
-    const r=await fetch('https://api.spotify.com/v1'+ep,{...opts,
-      headers:{'Authorization':'Bearer '+tk,'Content-Type':'application/json',...(opts.headers||{})}});
-    if(r.status===429){
-      if(attempt>=4) throw new Error('Rate limit — probeer later opnieuw.');
-      await new Promise(res=>setTimeout(res,parseInt(r.headers.get('Retry-After')||'1')*1000*Math.pow(2,attempt)));
-      return api(ep,opts,attempt+1);
-    }
-    if(r.status===204) return {};
-    const d=await r.json();
-    if(!r.ok){
-      const msg=d?.error?.message||`HTTP ${r.status}`;
-      if(r.status===401) throw new Error('Sessie verlopen — log opnieuw in.');
-      if(r.status===403) throw new Error('Toegang geweigerd: '+msg);
-      throw new Error(`Spotify fout ${r.status}: ${msg}`);
-    }
-    return d;
-  }
-  async function handleCallback() {
-    const p=new URLSearchParams(location.search);
-    if(p.get('error')) throw new Error('Login geweigerd: '+p.get('error'));
-    if(!p.get('code')) return false;
-    await _exchange(p.get('code'));
-    history.replaceState({},'',location.pathname);
-    return true;
-  }
-  function logout() { ['token','exp','refresh','v'].forEach(n=>localStorage.removeItem(k(n))); }
+// ── Spotify PKCE ──────────────────────────────────────────────────────────
+const SP=(()=>{
+  const P='qc2_',k=n=>P+n,SCOPES='playlist-modify-public playlist-modify-private';
+  async function rand32(){const a=new Uint8Array(32);crypto.getRandomValues(a);return btoa(String.fromCharCode(...a)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');}
+  async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');}
+  function redirectUri(){return window.location.origin+window.location.pathname;}
+  async function login(cid){localStorage.setItem(k('cid'),cid);const v=await rand32();localStorage.setItem(k('v'),v);const ch=await sha256(v);window.location='https://accounts.spotify.com/authorize?'+new URLSearchParams({client_id:cid,response_type:'code',redirect_uri:redirectUri(),scope:SCOPES,code_challenge_method:'S256',code_challenge:ch});}
+  async function _save(r){const d=await r.json();if(!r.ok)throw new Error(d.error_description||d.error||`HTTP ${r.status}`);localStorage.setItem(k('token'),d.access_token);localStorage.setItem(k('exp'),Date.now()+(d.expires_in-60)*1000);if(d.refresh_token)localStorage.setItem(k('refresh'),d.refresh_token);}
+  async function _exchange(code){await _save(await fetch('https://accounts.spotify.com/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'authorization_code',code,redirect_uri:redirectUri(),client_id:localStorage.getItem(k('cid')),code_verifier:localStorage.getItem(k('v'))})}))}
+  async function _refresh(){const rt=localStorage.getItem(k('refresh'));if(!rt)throw new Error('Sessie verlopen.');await _save(await fetch('https://accounts.spotify.com/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'refresh_token',refresh_token:rt,client_id:localStorage.getItem(k('cid'))})}))}
+  async function token(){const t=localStorage.getItem(k('token')),e=parseInt(localStorage.getItem(k('exp'))||'0');if(t&&Date.now()<e)return t;await _refresh();return localStorage.getItem(k('token'));}
+  async function api(ep,opts={},attempt=0){const tk=await token();const r=await fetch('https://api.spotify.com/v1'+ep,{...opts,headers:{'Authorization':'Bearer '+tk,'Content-Type':'application/json',...(opts.headers||{})}});if(r.status===429){if(attempt>=4)throw new Error('Rate limit.');await new Promise(res=>setTimeout(res,parseInt(r.headers.get('Retry-After')||'1')*1000*Math.pow(2,attempt)));return api(ep,opts,attempt+1);}if(r.status===204)return{};const d=await r.json();if(!r.ok){const msg=d?.error?.message||`HTTP ${r.status}`;if(r.status===401)throw new Error('Sessie verlopen.');if(r.status===403)throw new Error('Toegang geweigerd: '+msg);throw new Error(`Spotify fout ${r.status}: ${msg}`);}return d;}
+  async function handleCallback(){const p=new URLSearchParams(location.search);if(p.get('error'))throw new Error('Login geweigerd: '+p.get('error'));if(!p.get('code'))return false;await _exchange(p.get('code'));history.replaceState({},'',location.pathname);return true;}
+  function logout(){['token','exp','refresh','v'].forEach(n=>localStorage.removeItem(k(n)));}
   const isConnected=()=>!!localStorage.getItem(k('token'));
   const clientId=()=>localStorage.getItem(k('cid'))||'';
-
-  async function searchTrack(title,artist) {
-    const q=encodeURIComponent(`track:${title} artist:${artist}`);
-    const d=await api(`/search?q=${q}&type=track&limit=1`);
-    return d.tracks?.items?.[0]?.uri??null;
-  }
-  async function createPlaylist(name,desc) {
-    return api('/me/playlists',{method:'POST',body:JSON.stringify({name,description:desc,public:false})});
-  }
-  async function addItems(plId,uris) {
-    for(let i=0;i<uris.length;i+=100)
-      await api(`/playlists/${plId}/items`,{method:'POST',body:JSON.stringify({uris:uris.slice(i,i+100)})});
-  }
-  return {login,handleCallback,logout,isConnected,clientId,redirectUri,api,searchTrack,createPlaylist,addItems};
+  async function searchTrack(title,artist){const q=encodeURIComponent(`track:${title} artist:${artist}`);const d=await api(`/search?q=${q}&type=track&limit=1`);return d.tracks?.items?.[0]?.uri??null;}
+  async function createPlaylist(name,desc){return api('/me/playlists',{method:'POST',body:JSON.stringify({name,description:desc,public:false})});}
+  async function addItems(id,uris){for(let i=0;i<uris.length;i+=100)await api(`/playlists/${id}/items`,{method:'POST',body:JSON.stringify({uris:uris.slice(i,i+100)})});}
+  return{login,handleCallback,logout,isConnected,clientId,redirectUri,searchTrack,createPlaylist,addItems};
 })();
 
-// ── Setlist data ──────────────────────────────────────────────────────────
+// ── Setlist data (~20 nummers per set, geen duplicaten) ───────────────────
 const SETLISTS = {
   classic: [
     {
-      name:"The Villains of Circumstance Tour",
-      venue:"Ziggo Dome, Amsterdam",
-      date:"22 maart 2026",
-      sections:[
-        {title:"Opening", tracks:[
-          {title:"You Think I Ain't Worth a Dollar, But I Feel Like a Millionaire",album:"Songs for the Deaf",duration:"3:12"},
-          {title:"No One Knows",album:"Songs for the Deaf",duration:"4:38"},
-          {title:"Go with the Flow",album:"Songs for the Deaf",duration:"3:09"},
-          {title:"3's & 7's",album:"Era Vulgaris",duration:"3:43"},
-          {title:"Little Sister",album:"Lullabies to Paralyze",duration:"2:54"},
+      name: "The Villains of Circumstance Tour — Nacht I",
+      venue: "Ziggo Dome, Amsterdam", date: "22 maart 2026",
+      sections: [
+        { title: "Opening", tracks: [
+          { t: "You Think I Ain't Worth a Dollar, But I Feel Like a Millionaire", a: "Songs for the Deaf", d: "3:12" },
+          { t: "No One Knows", a: "Songs for the Deaf", d: "4:38" },
+          { t: "Go with the Flow", a: "Songs for the Deaf", d: "3:09" },
+          { t: "Sick Sick Sick", a: "Era Vulgaris", d: "3:26" },
+          { t: "3's & 7's", a: "Era Vulgaris", d: "3:43" },
         ]},
-        {title:"Middenstuk", tracks:[
-          {title:"Sick Sick Sick",album:"Era Vulgaris",duration:"3:26"},
-          {title:"My God Is the Sun",album:"...Like Clockwork",duration:"3:54"},
-          {title:"Smooth Sailing",album:"...Like Clockwork",duration:"4:08"},
-          {title:"The Way You Used to Do",album:"Villains",duration:"3:32"},
-          {title:"Feet Don't Fail",album:"Villains",duration:"5:02"},
-          {title:"Head Like a Haunted House",album:"Villains",duration:"3:41"},
-          {title:"Make It Wit Chu",album:"Era Vulgaris",duration:"4:08"},
+        { title: "Middenstuk I", tracks: [
+          { t: "Little Sister", a: "Lullabies to Paralyze", d: "2:54" },
+          { t: "Everybody Knows That You Are Insane", a: "Lullabies to Paralyze", d: "4:14" },
+          { t: "Burn the Witch", a: "Lullabies to Paralyze", d: "3:35" },
+          { t: "My God Is the Sun", a: "...Like Clockwork", d: "3:54" },
+          { t: "I Sat by the Ocean", a: "...Like Clockwork", d: "3:54" },
+          { t: "Smooth Sailing", a: "...Like Clockwork", d: "4:08" },
         ]},
-        {title:"Encore", tracks:[
-          {title:"I Sat by the Ocean",album:"...Like Clockwork",duration:"3:54"},
-          {title:"A Song for the Dead",album:"Songs for the Deaf",duration:"6:42"},
-          {title:"Song for the Dead",album:"Songs for the Deaf",duration:"5:52"},
-        ], encore:true}
+        { title: "Middenstuk II", tracks: [
+          { t: "The Way You Used to Do", a: "Villains", d: "3:32" },
+          { t: "Head Like a Haunted House", a: "Villains", d: "3:41" },
+          { t: "Feet Don't Fail", a: "Villains", d: "5:02" },
+          { t: "Make It Wit Chu", a: "Era Vulgaris", d: "4:08" },
+          { t: "Paper Machete", a: "In Times New Roman...", d: "4:05" },
+        ]},
+        { title: "Encore", encore: true, tracks: [
+          { t: "Turnin' on the Screw", a: "Era Vulgaris", d: "4:44" },
+          { t: "God Is in the Radio", a: "Songs for the Deaf", d: "6:04" },
+          { t: "A Song for the Dead", a: "Songs for the Deaf", d: "6:42" },
+        ]}
       ]
     },
     {
-      name:"Desert Sessions Live",
-      venue:"AFAS Live, Amsterdam",
-      date:"22 maart 2026",
-      sections:[
-        {title:"Opening", tracks:[
-          {title:"Turnin' on the Screw",album:"Era Vulgaris",duration:"4:44"},
-          {title:"Sick Sick Sick",album:"Era Vulgaris",duration:"3:26"},
-          {title:"No One Knows",album:"Songs for the Deaf",duration:"4:38"},
-          {title:"Go with the Flow",album:"Songs for the Deaf",duration:"3:09"},
-          {title:"Burn the Witch",album:"Lullabies to Paralyze",duration:"3:35"},
+      name: "The Villains of Circumstance Tour — Nacht II",
+      venue: "Ziggo Dome, Amsterdam", date: "23 maart 2026",
+      sections: [
+        { title: "Opening", tracks: [
+          { t: "Turnin' on the Screw", a: "Era Vulgaris", d: "4:44" },
+          { t: "Sick Sick Sick", a: "Era Vulgaris", d: "3:26" },
+          { t: "No One Knows", a: "Songs for the Deaf", d: "4:38" },
+          { t: "First It Giveth", a: "Songs for the Deaf", d: "3:18" },
+          { t: "Hangin' Tree", a: "Songs for the Deaf", d: "3:06" },
         ]},
-        {title:"Middenstuk", tracks:[
-          {title:"Mexicola",album:"Queens of the Stone Age",duration:"4:54"},
-          {title:"The Lost Art of Keeping a Secret",album:"Rated R",duration:"3:37"},
-          {title:"Little Sister",album:"Lullabies to Paralyze",duration:"2:54"},
-          {title:"I Appear Missing",album:"...Like Clockwork",duration:"6:32"},
-          {title:"3's & 7's",album:"Era Vulgaris",duration:"3:43"},
-          {title:"Paper Machete",album:"In Times New Roman...",duration:"4:05"},
-          {title:"Feet Don't Fail",album:"Villains",duration:"5:02"},
+        { title: "Middenstuk I", tracks: [
+          { t: "The Lost Art of Keeping a Secret", a: "Rated R", d: "3:37" },
+          { t: "Leg of Lamb", a: "Rated R", d: "3:34" },
+          { t: "Mexicola", a: "Queens of the Stone Age", d: "4:54" },
+          { t: "Regular John", a: "Queens of the Stone Age", d: "4:35" },
+          { t: "Tangled Up in Plaid", a: "Lullabies to Paralyze", d: "4:13" },
+          { t: "Someone's in the Wolf", a: "Lullabies to Paralyze", d: "7:15" },
         ]},
-        {title:"Encore", tracks:[
-          {title:"God Is in the Radio",album:"Songs for the Deaf",duration:"6:04"},
-          {title:"You Think I Ain't Worth a Dollar, But I Feel Like a Millionaire",album:"Songs for the Deaf",duration:"3:12"},
-          {title:"A Song for the Dead",album:"Songs for the Deaf",duration:"6:42"},
-        ], encore:true}
+        { title: "Middenstuk II", tracks: [
+          { t: "Keep Your Eyes Peeled", a: "...Like Clockwork", d: "5:43" },
+          { t: "If I Had a Tail", a: "...Like Clockwork", d: "4:18" },
+          { t: "I Appear Missing", a: "...Like Clockwork", d: "6:32" },
+          { t: "Obscenery", a: "In Times New Roman...", d: "4:37" },
+          { t: "Emotion Sickness", a: "In Times New Roman...", d: "5:12" },
+        ]},
+        { title: "Encore", encore: true, tracks: [
+          { t: "My God Is the Sun", a: "...Like Clockwork", d: "3:54" },
+          { t: "Go with the Flow", a: "Songs for the Deaf", d: "3:09" },
+          { t: "Mosquito Song", a: "Songs for the Deaf", d: "5:37" },
+        ]}
+      ]
+    },
+    {
+      name: "The Villains of Circumstance Tour — Nacht III",
+      venue: "Ziggo Dome, Amsterdam", date: "24 maart 2026",
+      sections: [
+        { title: "Opening", tracks: [
+          { t: "Battery Acid", a: "Era Vulgaris", d: "3:41" },
+          { t: "3's & 7's", a: "Era Vulgaris", d: "3:43" },
+          { t: "Misfit Love", a: "Era Vulgaris", d: "5:43" },
+          { t: "Into the Hollow", a: "Era Vulgaris", d: "4:51" },
+          { t: "Run Pig Run", a: "Era Vulgaris", d: "3:36" },
+        ]},
+        { title: "Middenstuk I", tracks: [
+          { t: "Little Sister", a: "Lullabies to Paralyze", d: "2:54" },
+          { t: "In My Head", a: "Lullabies to Paralyze", d: "4:01" },
+          { t: "I Never Came", a: "Lullabies to Paralyze", d: "4:48" },
+          { t: "The Blood Is Love", a: "Lullabies to Paralyze", d: "6:37" },
+          { t: "Long Slow Goodbye", a: "Lullabies to Paralyze", d: "6:50" },
+        ]},
+        { title: "Middenstuk II", tracks: [
+          { t: "Feet Don't Fail", a: "Villains", d: "5:02" },
+          { t: "Un-Reborn Again", a: "Villains", d: "4:55" },
+          { t: "Domesticated Animals", a: "Villains", d: "5:42" },
+          { t: "Carnavoyeur", a: "In Times New Roman...", d: "4:28" },
+          { t: "Negative Space", a: "In Times New Roman...", d: "5:14" },
+        ]},
+        { title: "Encore", encore: true, tracks: [
+          { t: "No One Knows", a: "Songs for the Deaf", d: "4:38" },
+          { t: "You Think I Ain't Worth a Dollar, But I Feel Like a Millionaire", a: "Songs for the Deaf", d: "3:12" },
+          { t: "God Is in the Radio", a: "Songs for the Deaf", d: "6:04" },
+        ]}
       ]
     }
   ],
   deep: [
     {
-      name:"The Rare Cuts Tour",
-      venue:"Paradiso, Amsterdam",
-      date:"22 maart 2026",
-      sections:[
-        {title:"Opening", tracks:[
-          {title:"Regular John",album:"Queens of the Stone Age",duration:"4:35"},
-          {title:"Walkin' on the Sidewalks",album:"Queens of the Stone Age",duration:"5:03"},
-          {title:"You Can't Quit Me Baby",album:"Queens of the Stone Age",duration:"7:42"},
-          {title:"Leg of Lamb",album:"Rated R",duration:"3:34"},
-          {title:"Better Living Through Chemistry",album:"Rated R",duration:"6:22"},
+      name: "The Rare Cuts — Nacht I",
+      venue: "Paradiso, Amsterdam", date: "22 maart 2026",
+      sections: [
+        { title: "Opening", tracks: [
+          { t: "Regular John", a: "Queens of the Stone Age", d: "4:35" },
+          { t: "Walkin' on the Sidewalks", a: "Queens of the Stone Age", d: "5:03" },
+          { t: "You Can't Quit Me Baby", a: "Queens of the Stone Age", d: "7:42" },
+          { t: "If Only", a: "Queens of the Stone Age", d: "3:20" },
+          { t: "Mexicola", a: "Queens of the Stone Age", d: "4:54" },
         ]},
-        {title:"Middenstuk", tracks:[
-          {title:"Someone's in the Wolf",album:"Lullabies to Paralyze",duration:"7:15"},
-          {title:"The Blood Is Love",album:"Lullabies to Paralyze",duration:"6:37"},
-          {title:"Suture Up Your Future",album:"Era Vulgaris",duration:"3:54"},
-          {title:"Into the Hollow",album:"Era Vulgaris",duration:"4:51"},
-          {title:"Kalopsia",album:"...Like Clockwork",duration:"5:09"},
-          {title:"Fairweather Friends",album:"...Like Clockwork",duration:"5:27"},
-          {title:"Negative Space",album:"In Times New Roman...",duration:"5:14"},
+        { title: "Middenstuk I", tracks: [
+          { t: "Better Living Through Chemistry", a: "Rated R", d: "6:22" },
+          { t: "Leg of Lamb", a: "Rated R", d: "3:34" },
+          { t: "Auto Pilot", a: "Rated R", d: "3:44" },
+          { t: "I Think I Lost My Headache", a: "Rated R", d: "7:04" },
+          { t: "In the Fade", a: "Rated R", d: "4:35" },
         ]},
-        {title:"Encore", tracks:[
-          {title:"I Think I Lost My Headache",album:"Rated R",duration:"7:04"},
-          {title:"Mosquito Song",album:"Songs for the Deaf",duration:"5:37"},
-          {title:"Long Slow Goodbye",album:"Lullabies to Paralyze",duration:"6:50"},
-        ], encore:true}
+        { title: "Middenstuk II", tracks: [
+          { t: "Tangled Up in Plaid", a: "Lullabies to Paralyze", d: "4:13" },
+          { t: "Someone's in the Wolf", a: "Lullabies to Paralyze", d: "7:15" },
+          { t: "The Blood Is Love", a: "Lullabies to Paralyze", d: "6:37" },
+          { t: "Broken Box", a: "Lullabies to Paralyze", d: "3:02" },
+          { t: "You Got a Killer Scene There, Man", a: "Lullabies to Paralyze", d: "4:56" },
+        ]},
+        { title: "Encore", encore: true, tracks: [
+          { t: "Suture Up Your Future", a: "Era Vulgaris", d: "3:54" },
+          { t: "River in the Road", a: "Era Vulgaris", d: "3:59" },
+          { t: "Mosquito Song", a: "Songs for the Deaf", d: "5:37" },
+          { t: "Long Slow Goodbye", a: "Lullabies to Paralyze", d: "6:50" },
+        ]}
+      ]
+    },
+    {
+      name: "The Rare Cuts — Nacht II",
+      venue: "Paradiso, Amsterdam", date: "23 maart 2026",
+      sections: [
+        { title: "Opening", tracks: [
+          { t: "Avon", a: "Queens of the Stone Age", d: "3:22" },
+          { t: "How to Handle a Rope", a: "Queens of the Stone Age", d: "3:30" },
+          { t: "Monsters in the Parasol", a: "Rated R", d: "3:56" },
+          { t: "Quick and to the Pointless", a: "Rated R", d: "2:22" },
+          { t: "Lightning Song", a: "Rated R", d: "3:07" },
+        ]},
+        { title: "Middenstuk I", tracks: [
+          { t: "Medication", a: "Lullabies to Paralyze", d: "1:54" },
+          { t: "I Never Came", a: "Lullabies to Paralyze", d: "4:48" },
+          { t: "Skin on Skin", a: "Lullabies to Paralyze", d: "3:42" },
+          { t: "In My Head", a: "Lullabies to Paralyze", d: "4:01" },
+          { t: "Long Slow Goodbye", a: "Lullabies to Paralyze", d: "6:50" },
+        ]},
+        { title: "Middenstuk II", tracks: [
+          { t: "Kalopsia", a: "...Like Clockwork", d: "5:09" },
+          { t: "Fairweather Friends", a: "...Like Clockwork", d: "5:27" },
+          { t: "The Vampyre of Time and Memory", a: "...Like Clockwork", d: "4:44" },
+          { t: "Negative Space", a: "In Times New Roman...", d: "5:14" },
+          { t: "Time & Place", a: "In Times New Roman...", d: "4:15" },
+        ]},
+        { title: "Encore", encore: true, tracks: [
+          { t: "Better Living Through Chemistry", a: "Rated R", d: "6:22" },
+          { t: "God Is in the Radio", a: "Songs for the Deaf", d: "6:04" },
+          { t: "...Like Clockwork", a: "...Like Clockwork", d: "4:44" },
+        ]}
       ]
     }
   ],
   heavy: [
     {
-      name:"Maximum Volume Tour",
-      venue:"Heineken Music Hall, Amsterdam",
-      date:"22 maart 2026",
-      sections:[
-        {title:"Opening", tracks:[
-          {title:"You Think I Ain't Worth a Dollar, But I Feel Like a Millionaire",album:"Songs for the Deaf",duration:"3:12"},
-          {title:"Sick Sick Sick",album:"Era Vulgaris",duration:"3:26"},
-          {title:"No One Knows",album:"Songs for the Deaf",duration:"4:38"},
-          {title:"Burn the Witch",album:"Lullabies to Paralyze",duration:"3:35"},
-          {title:"My God Is the Sun",album:"...Like Clockwork",duration:"3:54"},
+      name: "Maximum Volume — Nacht I",
+      venue: "Heineken Music Hall, Amsterdam", date: "22 maart 2026",
+      sections: [
+        { title: "Opening", tracks: [
+          { t: "You Think I Ain't Worth a Dollar, But I Feel Like a Millionaire", a: "Songs for the Deaf", d: "3:12" },
+          { t: "Sick Sick Sick", a: "Era Vulgaris", d: "3:26" },
+          { t: "No One Knows", a: "Songs for the Deaf", d: "4:38" },
+          { t: "Burn the Witch", a: "Lullabies to Paralyze", d: "3:35" },
+          { t: "My God Is the Sun", a: "...Like Clockwork", d: "3:54" },
         ]},
-        {title:"Middenstuk", tracks:[
-          {title:"Hangin' Tree",album:"Songs for the Deaf",duration:"3:06"},
-          {title:"Run Pig Run",album:"Era Vulgaris",duration:"3:36"},
-          {title:"Turnin' on the Screw",album:"Era Vulgaris",duration:"4:44"},
-          {title:"Battery Acid",album:"Era Vulgaris",duration:"3:41"},
-          {title:"3's & 7's",album:"Era Vulgaris",duration:"3:43"},
-          {title:"First It Giveth",album:"Songs for the Deaf",duration:"3:18"},
-          {title:"Head Like a Haunted House",album:"Villains",duration:"3:41"},
+        { title: "Middenstuk I", tracks: [
+          { t: "Hangin' Tree", a: "Songs for the Deaf", d: "3:06" },
+          { t: "First It Giveth", a: "Songs for the Deaf", d: "3:18" },
+          { t: "Run Pig Run", a: "Era Vulgaris", d: "3:36" },
+          { t: "Battery Acid", a: "Era Vulgaris", d: "3:41" },
+          { t: "Turnin' on the Screw", a: "Era Vulgaris", d: "4:44" },
+          { t: "3's & 7's", a: "Era Vulgaris", d: "3:43" },
         ]},
-        {title:"Encore", tracks:[
-          {title:"A Song for the Dead",album:"Songs for the Deaf",duration:"6:42"},
-          {title:"Song for the Dead",album:"Songs for the Deaf",duration:"5:52"},
-          {title:"God Is in the Radio",album:"Songs for the Deaf",duration:"6:04"},
-        ], encore:true}
+        { title: "Middenstuk II", tracks: [
+          { t: "Head Like a Haunted House", a: "Villains", d: "3:41" },
+          { t: "Paper Machete", a: "In Times New Roman...", d: "4:05" },
+          { t: "Emotion Sickness", a: "In Times New Roman...", d: "5:12" },
+          { t: "I Appear Missing", a: "...Like Clockwork", d: "6:32" },
+          { t: "Misfit Love", a: "Era Vulgaris", d: "5:43" },
+        ]},
+        { title: "Encore", encore: true, tracks: [
+          { t: "A Song for the Dead", a: "Songs for the Deaf", d: "6:42" },
+          { t: "God Is in the Radio", a: "Songs for the Deaf", d: "6:04" },
+          { t: "Into the Hollow", a: "Era Vulgaris", d: "4:51" },
+        ]}
+      ]
+    },
+    {
+      name: "Maximum Volume — Nacht II",
+      venue: "Heineken Music Hall, Amsterdam", date: "23 maart 2026",
+      sections: [
+        { title: "Opening", tracks: [
+          { t: "Turnin' on the Screw", a: "Era Vulgaris", d: "4:44" },
+          { t: "No One Knows", a: "Songs for the Deaf", d: "4:38" },
+          { t: "3's & 7's", a: "Era Vulgaris", d: "3:43" },
+          { t: "Sick Sick Sick", a: "Era Vulgaris", d: "3:26" },
+          { t: "Hangin' Tree", a: "Songs for the Deaf", d: "3:06" },
+        ]},
+        { title: "Middenstuk I", tracks: [
+          { t: "You Can't Quit Me Baby", a: "Queens of the Stone Age", d: "7:42" },
+          { t: "Mexicola", a: "Queens of the Stone Age", d: "4:54" },
+          { t: "Walkin' on the Sidewalks", a: "Queens of the Stone Age", d: "5:03" },
+          { t: "Someone's in the Wolf", a: "Lullabies to Paralyze", d: "7:15" },
+          { t: "The Blood Is Love", a: "Lullabies to Paralyze", d: "6:37" },
+        ]},
+        { title: "Middenstuk II", tracks: [
+          { t: "Keep Your Eyes Peeled", a: "...Like Clockwork", d: "5:43" },
+          { t: "My God Is the Sun", a: "...Like Clockwork", d: "3:54" },
+          { t: "Head Like a Haunted House", a: "Villains", d: "3:41" },
+          { t: "Feet Don't Fail", a: "Villains", d: "5:02" },
+          { t: "Carnavoyeur", a: "In Times New Roman...", d: "4:28" },
+        ]},
+        { title: "Encore", encore: true, tracks: [
+          { t: "Battery Acid", a: "Era Vulgaris", d: "3:41" },
+          { t: "Run Pig Run", a: "Era Vulgaris", d: "3:36" },
+          { t: "You Think I Ain't Worth a Dollar, But I Feel Like a Millionaire", a: "Songs for the Deaf", d: "3:12" },
+        ]}
       ]
     }
   ],
   hits: [
     {
-      name:"The Essential Tour",
-      venue:"Johan Cruijff ArenA, Amsterdam",
-      date:"22 maart 2026",
-      sections:[
-        {title:"Opening", tracks:[
-          {title:"Go with the Flow",album:"Songs for the Deaf",duration:"3:09"},
-          {title:"No One Knows",album:"Songs for the Deaf",duration:"4:38"},
-          {title:"Little Sister",album:"Lullabies to Paralyze",duration:"2:54"},
-          {title:"The Lost Art of Keeping a Secret",album:"Rated R",duration:"3:37"},
-          {title:"The Way You Used to Do",album:"Villains",duration:"3:32"},
+      name: "The Essential Tour — Nacht I",
+      venue: "Johan Cruijff ArenA, Amsterdam", date: "22 maart 2026",
+      sections: [
+        { title: "Opening", tracks: [
+          { t: "Go with the Flow", a: "Songs for the Deaf", d: "3:09" },
+          { t: "No One Knows", a: "Songs for the Deaf", d: "4:38" },
+          { t: "Little Sister", a: "Lullabies to Paralyze", d: "2:54" },
+          { t: "The Lost Art of Keeping a Secret", a: "Rated R", d: "3:37" },
+          { t: "3's & 7's", a: "Era Vulgaris", d: "3:43" },
         ]},
-        {title:"Middenstuk", tracks:[
-          {title:"3's & 7's",album:"Era Vulgaris",duration:"3:43"},
-          {title:"Sick Sick Sick",album:"Era Vulgaris",duration:"3:26"},
-          {title:"Make It Wit Chu",album:"Era Vulgaris",duration:"4:08"},
-          {title:"I Sat by the Ocean",album:"...Like Clockwork",duration:"3:54"},
-          {title:"Smooth Sailing",album:"...Like Clockwork",duration:"4:08"},
-          {title:"My God Is the Sun",album:"...Like Clockwork",duration:"3:54"},
-          {title:"Feet Don't Fail",album:"Villains",duration:"5:02"},
+        { title: "Middenstuk I", tracks: [
+          { t: "Sick Sick Sick", a: "Era Vulgaris", d: "3:26" },
+          { t: "Make It Wit Chu", a: "Era Vulgaris", d: "4:08" },
+          { t: "Burn the Witch", a: "Lullabies to Paralyze", d: "3:35" },
+          { t: "Everybody Knows That You Are Insane", a: "Lullabies to Paralyze", d: "4:14" },
+          { t: "My God Is the Sun", a: "...Like Clockwork", d: "3:54" },
+          { t: "I Sat by the Ocean", a: "...Like Clockwork", d: "3:54" },
         ]},
-        {title:"Encore", tracks:[
-          {title:"You Think I Ain't Worth a Dollar, But I Feel Like a Millionaire",album:"Songs for the Deaf",duration:"3:12"},
-          {title:"A Song for the Dead",album:"Songs for the Deaf",duration:"6:42"},
-          {title:"No One Knows",album:"Songs for the Deaf",duration:"4:38"},
-        ], encore:true}
+        { title: "Middenstuk II", tracks: [
+          { t: "Smooth Sailing", a: "...Like Clockwork", d: "4:08" },
+          { t: "The Way You Used to Do", a: "Villains", d: "3:32" },
+          { t: "Feet Don't Fail", a: "Villains", d: "5:02" },
+          { t: "Head Like a Haunted House", a: "Villains", d: "3:41" },
+          { t: "Paper Machete", a: "In Times New Roman...", d: "4:05" },
+        ]},
+        { title: "Encore", encore: true, tracks: [
+          { t: "You Think I Ain't Worth a Dollar, But I Feel Like a Millionaire", a: "Songs for the Deaf", d: "3:12" },
+          { t: "God Is in the Radio", a: "Songs for the Deaf", d: "6:04" },
+          { t: "A Song for the Dead", a: "Songs for the Deaf", d: "6:42" },
+        ]}
+      ]
+    },
+    {
+      name: "The Essential Tour — Nacht II",
+      venue: "Johan Cruijff ArenA, Amsterdam", date: "23 maart 2026",
+      sections: [
+        { title: "Opening", tracks: [
+          { t: "Turnin' on the Screw", a: "Era Vulgaris", d: "4:44" },
+          { t: "No One Knows", a: "Songs for the Deaf", d: "4:38" },
+          { t: "Go with the Flow", a: "Songs for the Deaf", d: "3:09" },
+          { t: "The Lost Art of Keeping a Secret", a: "Rated R", d: "3:37" },
+          { t: "Little Sister", a: "Lullabies to Paralyze", d: "2:54" },
+        ]},
+        { title: "Middenstuk I", tracks: [
+          { t: "3's & 7's", a: "Era Vulgaris", d: "3:43" },
+          { t: "Make It Wit Chu", a: "Era Vulgaris", d: "4:08" },
+          { t: "Sick Sick Sick", a: "Era Vulgaris", d: "3:26" },
+          { t: "I Sat by the Ocean", a: "...Like Clockwork", d: "3:54" },
+          { t: "I Appear Missing", a: "...Like Clockwork", d: "6:32" },
+          { t: "Keep Your Eyes Peeled", a: "...Like Clockwork", d: "5:43" },
+        ]},
+        { title: "Middenstuk II", tracks: [
+          { t: "Feet Don't Fail", a: "Villains", d: "5:02" },
+          { t: "The Way You Used to Do", a: "Villains", d: "3:32" },
+          { t: "Un-Reborn Again", a: "Villains", d: "4:55" },
+          { t: "Obscenery", a: "In Times New Roman...", d: "4:37" },
+          { t: "Emotion Sickness", a: "In Times New Roman...", d: "5:12" },
+        ]},
+        { title: "Encore", encore: true, tracks: [
+          { t: "My God Is the Sun", a: "...Like Clockwork", d: "3:54" },
+          { t: "Burn the Witch", a: "Lullabies to Paralyze", d: "3:35" },
+          { t: "You Think I Ain't Worth a Dollar, But I Feel Like a Millionaire", a: "Songs for the Deaf", d: "3:12" },
+        ]}
       ]
     }
   ]
@@ -752,69 +480,68 @@ document.querySelectorAll('.vibe-btn').forEach(b=>
   b.addEventListener('click',()=>{
     document.querySelectorAll('.vibe-btn').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
+    updateCounter(b.dataset.vibe, 0);
   })
 );
 
-function updateSpUI() {
+function updateSpUI(){
   const ok=SP.isConnected();
   document.getElementById('spLoginArea').style.display=ok?'none':'flex';
-  document.getElementById('spConnectedArea').style.display=ok?'flex':'none';
-  const hint=document.getElementById('spHint');
-  hint.innerHTML=ok?'':
+  const ca=document.getElementById('spConnectedArea');
+  ca.style.display=ok?'flex':'none';
+  document.getElementById('spHint').innerHTML=ok?'':
     `Redirect URI voor Spotify Dashboard: <code>${SP.redirectUri()}</code>`;
   const btn=document.getElementById('spAddBtn');
   if(btn) btn.classList.toggle('show',ok);
 }
 
-function doLogin() {
-  const cid=document.getElementById('cidInput').value.trim();
-  if(!cid){alert('Vul je Client ID in.');return;}
-  SP.login(cid).catch(e=>alert(e.message));
-}
+function doLogin(){const cid=document.getElementById('cidInput').value.trim();if(!cid){alert('Vul je Client ID in.');return;}SP.login(cid).catch(e=>alert(e.message));}
 function doLogout(){SP.logout();updateSpUI();}
 
 const lastIdx={};
 
-function generateSetlist() {
+function updateCounter(vibe, current){
+  const total = SETLISTS[vibe].length;
+  const el = document.getElementById('variantCounter');
+  if(total > 1){
+    el.innerHTML = `Variant <span>${current+1}</span> van <span>${total}</span> — druk opnieuw voor een andere setlist`;
+  } else {
+    el.innerHTML = '&nbsp;';
+  }
+}
+
+function generateSetlist(){
   const vibe=document.querySelector('.vibe-btn.active').dataset.vibe;
   const pool=SETLISTS[vibe];
-  let idx=Math.floor(Math.random()*pool.length);
-  if(pool.length>1&&idx===(lastIdx[vibe]??-1)) idx=(idx+1)%pool.length;
+  let idx=(((lastIdx[vibe]??-1)+1)%pool.length);
   lastIdx[vibe]=idx;
+  updateCounter(vibe, idx);
   renderSetlist(pool[idx]);
 }
 
-function renderSetlist(set) {
+function renderSetlist(set){
   window.__currentSet__=set;
   const allTracks=set.sections.flatMap(s=>s.tracks);
-  const totalSecs=allTracks.reduce((a,t)=>{
-    const [m,s]=(t.duration||'4:00').split(':').map(Number);
-    return a+m*60+(s||0);
-  },0);
+  const totalSecs=allTracks.reduce((a,t)=>{const[m,s]=(t.d||'4:00').split(':').map(Number);return a+m*60+(s||0);},0);
   const totalMins=Math.floor(totalSecs/60);
-
   let num=0;
+
   const sectionsHtml=set.sections.map(sec=>`
     ${sec.encore?'<div class="encore-marker">— ✦ ENCORE ✦ —</div>':''}
     <div class="setlist-section">
       <div class="setlist-section-title">${sec.title}</div>
-      ${sec.tracks.map(t=>{
-        num++;
-        return `<div class="setlist-track">
+      ${sec.tracks.map(tr=>{num++;return `
+        <div class="setlist-track">
           <div class="track-num">${num}</div>
           <div>
-            <div class="track-name">${esc(t.title)}</div>
-            <div class="track-album">${esc(t.album)}</div>
+            <div class="track-name">${esc(tr.t)}</div>
+            <div class="track-album">${esc(tr.a)}</div>
           </div>
-          <div class="track-duration">${t.duration}</div>
-        </div>`;
-      }).join('')}
+          <div class="track-duration">${tr.d}</div>
+        </div>`;}).join('')}
     </div>`).join('');
 
-  const spBtn=SP.isConnected()
-    ?'<button class="sp-add-btn show" id="spAddBtn" onclick="addToSpotify()">▶ Zet op Spotify</button>'
-    :'<button class="sp-add-btn" id="spAddBtn" onclick="addToSpotify()">▶ Zet op Spotify</button>';
-
+  const spShow=SP.isConnected()?'show':'';
   const wrap=document.getElementById('setlistWrap');
   wrap.innerHTML=`
     <div class="ticket">
@@ -832,17 +559,23 @@ function renderSetlist(set) {
       <div class="tear-line"></div>
       <div class="setlist-body">${sectionsHtml}</div>
       <div class="ticket-footer">
-        <div class="footer-total">
-          <div class="footer-total-label">Totale speeltijd</div>
-          <div class="footer-total-val">${totalMins} minuten</div>
+        <div style="display:flex;gap:2rem;">
+          <div class="footer-stat">
+            <div class="footer-stat-label">Nummers</div>
+            <div class="footer-stat-val">${allTracks.length}</div>
+          </div>
+          <div class="footer-stat">
+            <div class="footer-stat-label">Speeltijd</div>
+            <div class="footer-stat-val">${totalMins} min</div>
+          </div>
         </div>
         <div>
-          ${spBtn}
+          <button class="sp-add-btn ${spShow}" id="spAddBtn" onclick="addToSpotify()">▶ Zet op Spotify</button>
           <div class="sp-feedback" id="spFeedback"></div>
         </div>
       </div>
     </div>
-    <div class="shuffle-note">Klik opnieuw voor een andere setlist</div>`;
+    <div class="shuffle-note">Druk opnieuw op "Genereer Setlist" voor de volgende variant</div>`;
 
   wrap.classList.remove('visible');
   void wrap.offsetWidth;
@@ -850,42 +583,31 @@ function renderSetlist(set) {
   wrap.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-async function addToSpotify() {
-  const btn=document.getElementById('spAddBtn');
-  const fb=document.getElementById('spFeedback');
-  btn.disabled=true; btn.textContent='Bezig…';
-  fb.className='sp-feedback'; fb.style.display='none';
-  try {
+async function addToSpotify(){
+  const btn=document.getElementById('spAddBtn'),fb=document.getElementById('spFeedback');
+  btn.disabled=true;btn.textContent='Bezig…';fb.className='sp-feedback';
+  try{
     const set=window.__currentSet__;
     const tracks=set.sections.flatMap(s=>s.tracks);
-    const pl=await SP.createPlaylist(
-      'QOTSA — '+set.name,
-      'Setlist gegenereerd via QOTSA Concert Generator'
-    );
+    const pl=await SP.createPlaylist('QOTSA — '+set.name,'Setlist gegenereerd via QOTSA Concert Generator');
     const uris=[];
-    for(const t of tracks){
-      const uri=await SP.searchTrack(t.title,'Queens of the Stone Age');
-      if(uri) uris.push(uri);
-    }
+    for(const t of tracks){const uri=await SP.searchTrack(t.t,'Queens of the Stone Age');if(uri)uris.push(uri);}
     await SP.addItems(pl.id,uris);
     const url=pl.external_urls?.spotify||'#';
-    fb.innerHTML=`✓ Setlist aangemaakt! ${uris.length}/${tracks.length} nummers gevonden. `
-      +`<a href="${url}" target="_blank" rel="noopener">Open in Spotify ↗</a>`;
+    fb.innerHTML=`✓ ${uris.length}/${tracks.length} nummers gevonden. <a href="${url}" target="_blank" rel="noopener">Open in Spotify ↗</a>`;
     fb.className='sp-feedback show ok';
-  } catch(e) {
-    fb.textContent='✗ '+e.message;
-    fb.className='sp-feedback show err';
-  }
-  btn.disabled=false; btn.textContent='▶ Zet op Spotify';
+  }catch(e){fb.textContent='✗ '+e.message;fb.className='sp-feedback show err';}
+  btn.disabled=false;btn.textContent='▶ Zet op Spotify';
 }
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 (async()=>{
   const cid=SP.clientId();
-  if(cid) document.getElementById('cidInput').value=cid;
+  if(cid)document.getElementById('cidInput').value=cid;
   try{await SP.handleCallback();}catch(e){alert(e.message);}
   updateSpUI();
+  updateCounter('classic',0);
 })();
 </script>
 </body>
